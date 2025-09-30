@@ -1,1 +1,1 @@
-# mini-apps-sdk
+# mini-app-sdk
