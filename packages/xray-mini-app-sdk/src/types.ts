@@ -1,4 +1,4 @@
-import { HOST_MESSAGE_TYPES, CLIENT_MESSAGE_TYPES } from "./constants"
+import { HOST_MESSAGE_TYPES, CLIENT_MESSAGE_TYPES } from "./constants.js"
 
 type Network = "mainnet" | "preprod" | "preview"
 type Explorer = "cardanoscan" | "cexplorer" | "adastat"

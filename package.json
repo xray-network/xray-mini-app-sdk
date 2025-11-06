@@ -9,12 +9,14 @@
     "build": "yarn workspaces run build",
     "clean": "yarn workspaces run clean",
     "lint": "echo \"No lint configured\"",
-    "format": "prettier --write \"./**/*.{js,jsx,ts,tsx,md,json,css,scss}\"",
+    "format": "prettier --config ./.prettierrc --ignore-path ./.prettierignore \"**/*.{js,jsx,ts,tsx,md,json,css,scss}\"",
+    "serve:core": "yarn workspace xray-mini-app-sdk sandbox",
     "publish:core": "yarn workspace xray-mini-app-sdk publish --access public",
     "publish:react": "yarn workspace xray-mini-app-sdk-react publish --access public"
   },
   "devDependencies": {
     "prettier": "^3.2.0",
+    "serve": "^14.2.5",
     "typescript": "^5.4.0"
   }
 }

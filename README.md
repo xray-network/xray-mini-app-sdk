@@ -18,6 +18,18 @@ Key scripts:
 - `yarn clean` – removes `dist` folders for each package (if the package defines the script).
 - `yarn publish:core` / `yarn publish:react` – publishes the respective package to npm (`--access public` is pre-configured).
 
+## Sandboxes
+
+> Build everything first (`yarn workspaces run build`). Then run `yarn serve:core` or `yarn serve:react`, which serve
+> each package folder (so both `dist` and `sandbox` are available). Open `/sandbox/host.html` in the reported URL.
+
+### Core messaging sandbox
+
+- Files: `packages/xray-mini-app-sdk/sandbox/host.html`, `packages/xray-mini-app-sdk/sandbox/client.html`.
+- Host HTML spins up the messenger, embeds the client iframe, and exposes buttons to send handshake/theme/tip messages.
+- Client HTML listens for host events and can issue URL/signature requests back to the host.
+
+
 ## Package Details
 
 ### `xray-mini-app-sdk`

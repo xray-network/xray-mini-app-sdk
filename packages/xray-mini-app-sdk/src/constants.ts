@@ -1,4 +1,4 @@
-import type { HostMessageType, ClientMessageType } from "./types"
+import type { HostMessageType, ClientMessageType } from "./types.js"
 
 export const HOST_MESSAGE_TYPES = [
   "host:handshake",

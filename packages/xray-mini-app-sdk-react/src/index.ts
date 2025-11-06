@@ -1,1 +1,1 @@
-export * from "./useMiniAppMessaging"
+export * from "./useMiniAppMessaging.js"

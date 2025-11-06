@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>XRAY Mini App SDK – Client Sandbox</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        padding: 1rem;
+      }
+      h2 {
+        margin-top: 0;
+      }
+      button {
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        border: none;
+        background: #0f172a;
+        color: white;
+        cursor: pointer;
+        margin-right: 0.5rem;
+      }
+      pre {
+        background: #f8fafc;
+        border-radius: 8px;
+        padding: 0.5rem;
+        font-size: 0.85rem;
+        max-height: 280px;
+        overflow: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Client Sandbox</h2>
+    <p>Status: <strong id="status">disconnected</strong></p>
+    <div>
+      <button id="urlBtn">Send URL</button>
+      <button id="signBtn">Send Sign Request</button>
+    </div>
+    <h3>Events</h3>
+    <pre id="log"></pre>
+
+    <script type="module">
+      import { createMiniAppClientMessenger } from "../dist/index.js"
+
+      const logEl = document.getElementById("log")
+      const statusEl = document.getElementById("status")
+
+      const appendLog = (prefix, payload) => {
+        const timestamp = new Date().toLocaleTimeString()
+        logEl.textContent = `[${timestamp}] ${prefix}: ${JSON.stringify(payload, null, 2)}\n${logEl.textContent}`
+      }
+
+      const messenger = createMiniAppClientMessenger()
+      const applyTheme = (theme) => {
+        document.body.dataset.theme = theme
+        document.body.style.background = theme === "dark" ? "#0f172a" : "#ffffff"
+        document.body.style.color = theme === "dark" ? "#f8fafc" : "#0f172a"
+      }
+
+      messenger.setMessageHandler((message) => {
+        statusEl.textContent = messenger.isConnected() ? "connected" : "disconnected"
+        appendLog("host → client", message)
+        if (message.type === "host:themeChanged" && message.payload?.theme) {
+          applyTheme(message.payload.theme)
+        }
+        if (message.type === "host:handshake" && message.payload?.theme) {
+          applyTheme(message.payload.theme)
+        }
+      })
+      messenger.connect()
+      // statusEl.textContent = messenger.isConnected() ? "connected" : "disconnected"
+
+      document.getElementById("urlBtn").addEventListener("click", () => {
+        messenger.send("client:urlChanged", { url: window.location.href })
+      })
+
+      document.getElementById("signBtn").addEventListener("click", () => {
+        messenger.send("client:signRequest", {
+          unsignedTxCbor: "<mock unsigned transaction cbor blob>",
+        })
+      })
+    </script>
+  </body>
+</html>

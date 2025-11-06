@@ -1,5 +1,5 @@
-import { MINI_APP_SDK_FLAG, CHANNEL_TRANSFER, CHANNEL_REQUEST, CLIENT_HANDSHAKE_TYPE } from "./constants"
-import { isClientMessageType, isHostMessageType, isRecord, isMiniAppSdkEvent, getParentWindow } from "./utils"
+import { MINI_APP_SDK_FLAG, CHANNEL_TRANSFER, CHANNEL_REQUEST, CLIENT_HANDSHAKE_TYPE } from "./constants.js"
+import { isClientMessageType, isHostMessageType, isRecord, isMiniAppSdkEvent, getParentWindow } from "./utils.js"
 import type {
   ClientMessage,
   ClientMessageType,
@@ -9,7 +9,7 @@ import type {
   HostMessagePayload,
   MiniAppHostMessenger,
   MiniAppClientMessenger,
-} from "./types"
+} from "./types.js"
 
 export const createMiniAppHostMessenger = (getTargetWindow: () => Window | null): MiniAppHostMessenger => {
   let port: MessagePort | null = null
