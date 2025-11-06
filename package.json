@@ -9,7 +9,7 @@
     "build": "yarn workspaces run build",
     "clean": "yarn workspaces run clean",
     "lint": "echo \"No lint configured\"",
-    "format": "prettier --config ./.prettierrc --ignore-path ./.prettierignore \"**/*.{js,jsx,ts,tsx,md,json,css,scss}\"",
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,md,json,css,scss,html}\"",
     "serve:core": "yarn workspace xray-mini-app-sdk sandbox",
     "publish:core": "yarn workspace xray-mini-app-sdk publish --access public",
     "publish:react": "yarn workspace xray-mini-app-sdk-react publish --access public"

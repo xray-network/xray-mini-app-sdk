@@ -29,7 +29,6 @@ Key scripts:
 - Host HTML spins up the messenger, embeds the client iframe, and exposes buttons to send handshake/theme/tip messages.
 - Client HTML listens for host events and can issue URL/signature requests back to the host.
 
-
 ## Package Details
 
 ### `xray-mini-app-sdk`

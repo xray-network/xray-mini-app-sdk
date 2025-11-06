@@ -1,86 +1,119 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>XRAY Mini App SDK – Client Sandbox</title>
     <style>
+      html {
+        height: 100%;
+      }
       body {
         margin: 0;
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        padding: 1rem;
+        font-family:
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+        height: 100%;
       }
       h2 {
         margin-top: 0;
+      }
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
       }
       button {
         padding: 0.5rem 1rem;
         border-radius: 6px;
         border: none;
-        background: #0f172a;
+        background: #0065ff;
         color: white;
         cursor: pointer;
         margin-right: 0.5rem;
+        font-weight: 600;
       }
-      pre {
-        background: #f8fafc;
+      .layout {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        padding: 1rem;
+        box-sizing: border-box;
+      }
+      .log {
+        height: 100%;
+        background: #0f172a;
+        color: #e2e8f0;
         border-radius: 8px;
         padding: 0.5rem;
         font-size: 0.85rem;
-        max-height: 280px;
         overflow: auto;
+        margin: 0;
       }
     </style>
   </head>
   <body>
-    <h2>Client Sandbox</h2>
-    <p>Status: <strong id="status">disconnected</strong></p>
-    <div>
-      <button id="urlBtn">Send URL</button>
-      <button id="signBtn">Send Sign Request</button>
+    <div class="layout">
+      <div class="header">
+        <h2>Client Controls</h2>
+        <p>Status: <strong id="status">disconnected</strong></p>
+        <div id="controls" class="controls"></div>
+        <h3>Events</h3>
+      </div>
+      <pre class="log" id="log"></pre>
     </div>
-    <h3>Events</h3>
-    <pre id="log"></pre>
 
     <script type="module">
-      import { createMiniAppClientMessenger } from "../dist/index.js"
+      import { createMiniAppClientMessenger, CLIENT_MESSAGE_TYPES } from "../dist/index.js"
 
       const logEl = document.getElementById("log")
       const statusEl = document.getElementById("status")
+      const controlsEl = document.getElementById("controls")
 
       const appendLog = (prefix, payload) => {
-        const timestamp = new Date().toLocaleTimeString()
-        logEl.textContent = `[${timestamp}] ${prefix}: ${JSON.stringify(payload, null, 2)}\n${logEl.textContent}`
+        const now = new Date();
+        const timeWithMs = now.toLocaleTimeString("en-US", { hour12: false }) + "." + String(now.getMilliseconds()).padStart(3, '0');
+        logEl.textContent = `[${timeWithMs}] ${prefix}: ${JSON.stringify(payload, null, 2)}\n${logEl.textContent}`
       }
 
       const messenger = createMiniAppClientMessenger()
-      const applyTheme = (theme) => {
-        document.body.dataset.theme = theme
-        document.body.style.background = theme === "dark" ? "#0f172a" : "#ffffff"
-        document.body.style.color = theme === "dark" ? "#f8fafc" : "#0f172a"
-      }
-
-      messenger.setMessageHandler((message) => {
+      const updateStatus = () => {
         statusEl.textContent = messenger.isConnected() ? "connected" : "disconnected"
+      }
+      messenger.setMessageHandler((message) => {
+        updateStatus()
         appendLog("host → client", message)
-        if (message.type === "host:themeChanged" && message.payload?.theme) {
-          applyTheme(message.payload.theme)
-        }
-        if (message.type === "host:handshake" && message.payload?.theme) {
-          applyTheme(message.payload.theme)
-        }
       })
       messenger.connect()
-      // statusEl.textContent = messenger.isConnected() ? "connected" : "disconnected"
+      updateStatus()
 
-      document.getElementById("urlBtn").addEventListener("click", () => {
-        messenger.send("client:urlChanged", { url: window.location.href })
-      })
+      const clientPayloadFactories = {
+        "client:handshake": () => undefined,
+        "client:urlChanged": () => ({ url: window.location.href }),
+        "client:signRequest": () => ({
+          unsignedTxCbor: "<mock unsigned tx cbor>",
+        }),
+        "client:submitRequest": () => ({
+          signedTxCbor: "<mock signed tx cbor>",
+        }),
+        "client:signAndSubmitRequest": () => ({
+          unsignedTxCbor: "<mock unsigned tx cbor>",
+        }),
+      }
 
-      document.getElementById("signBtn").addEventListener("click", () => {
-        messenger.send("client:signRequest", {
-          unsignedTxCbor: "<mock unsigned transaction cbor blob>",
+      CLIENT_MESSAGE_TYPES.forEach((type) => {
+        const btn = document.createElement("button")
+        btn.textContent = type
+        btn.addEventListener("click", () => {
+          const factory = clientPayloadFactories[type]
+          const payload = typeof factory === "function" ? factory() : undefined
+          messenger.send(type, payload)
         })
+        controlsEl.appendChild(btn)
       })
     </script>
   </body>

@@ -1,4 +1,4 @@
-import { MINI_APP_SDK_FLAG, CHANNEL_TRANSFER, CHANNEL_REQUEST, CLIENT_HANDSHAKE_TYPE } from "./constants.js"
+import { MINI_APP_SDK_FLAG, CHANNEL_TRANSFER, CHANNEL_REQUEST, CLIENT_HANDSHAKE_TYPE, HOST_HANDSHAKE_TYPE } from "./constants.js"
 import { isClientMessageType, isHostMessageType, isRecord, isMiniAppSdkEvent, getParentWindow } from "./utils.js"
 import type {
   ClientMessage,
@@ -55,6 +55,7 @@ export const createMiniAppHostMessenger = (getTargetWindow: () => Window | null)
 
     try {
       targetWindow.postMessage({ [MINI_APP_SDK_FLAG]: CHANNEL_TRANSFER }, "*", [channel.port2])
+      port.postMessage({ type: HOST_HANDSHAKE_TYPE })
     } catch (error) {
       cleanupPort()
       throw error

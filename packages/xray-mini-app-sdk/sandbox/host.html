@@ -1,28 +1,39 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>XRAY Mini App SDK – Host Sandbox</title>
+    <title>XRAY Mini App SDK — Host Sandbox</title>
     <style>
+      html {
+        height: 100%;
+      }
       body {
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        font-family:
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
         margin: 0;
         padding: 1.5rem;
         background: #f4f5f7;
+        height: calc(100% - 3rem);
       }
-      h1 {
+      h1,
+      h2 {
         margin-top: 0;
       }
       .layout {
         display: grid;
-        grid-template-columns: 320px 1fr;
+        grid-template-columns: 50% 1fr;
         gap: 1rem;
         align-items: start;
+        height: 100%;
       }
       iframe {
         width: 100%;
-        height: 420px;
+        height: 100%;
         border: 1px solid #d4d7dd;
         border-radius: 8px;
         background: white;
@@ -30,8 +41,32 @@
       .panel {
         padding: 1rem;
         background: white;
+        border: 1px solid #d4d7dd;
         border-radius: 8px;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+        height: 100%;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+      }
+      .log {
+        height: 100%;
+        background: #0f172a;
+        color: #e2e8f0;
+        border-radius: 8px;
+        padding: 0.5rem;
+        font-size: 0.85rem;
+        overflow: auto;
+        margin: 0;
+      }
+      .iframe {
+        height: 100%;
+      }
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
       }
       button {
         padding: 0.5rem 1rem;
@@ -43,84 +78,127 @@
         cursor: pointer;
         margin-right: 0.5rem;
       }
+      body[data-theme="dark"] button {
+        background: #4f46e5;
+        color: #e2e8f0;
+      }
       button:disabled {
         opacity: 0.5;
         cursor: not-allowed;
       }
-      pre {
+      body[data-theme="dark"] pre {
         background: #0f172a;
         color: #e2e8f0;
-        border-radius: 8px;
-        padding: 0.5rem;
-        font-size: 0.85rem;
-        max-height: 320px;
-        overflow: auto;
       }
     </style>
   </head>
   <body>
-    <h1>Host Sandbox</h1>
-    <p>
-      Build the package (<code>yarn workspace xray-mini-app-sdk build</code>) and then open this file with a static
-      server so relative module imports work (e.g. <code>npx serve packages/xray-mini-app-sdk/sandbox</code>).
-    </p>
     <div class="layout">
       <section class="panel">
-        <h2>Controls</h2>
-        <p>Status: <strong id="status">disconnected</strong></p>
-        <div>
-          <button id="handshakeBtn">Send Handshake</button>
-          <button id="themeBtn">Toggle Theme</button>
-          <button id="urlBtn">Request URL update</button>
+        <div class="header">
+          <h2>Host Controls</h2>
+          <p>Status: <strong id="status">disconnected</strong></p>
+          <div id="controls" class="controls"></div>
+          <h3>Events</h3>
         </div>
-        <h3>Events</h3>
-        <pre id="log"></pre>
+        <pre class="log" id="log"></pre>
       </section>
-      <section>
+      <section class="iframe">
         <iframe id="clientFrame" src="./client.html" title="Mini App Client"></iframe>
       </section>
     </div>
 
     <script type="module">
-      import { createMiniAppHostMessenger } from "../dist/index.js"
+      import { createMiniAppHostMessenger, HOST_MESSAGE_TYPES } from "../dist/index.js"
 
       const logEl = document.getElementById("log")
       const statusEl = document.getElementById("status")
       const iframe = document.getElementById("clientFrame")
+      const controlsEl = document.getElementById("controls")
 
       const appendLog = (prefix, payload) => {
-        const timestamp = new Date().toLocaleTimeString()
-        logEl.textContent = `[${timestamp}] ${prefix}: ${JSON.stringify(payload, null, 2)}\n${logEl.textContent}`
+        const now = new Date();
+        const timeWithMs = now.toLocaleTimeString("en-US", { hour12: false }) + "." + String(now.getMilliseconds()).padStart(3, '0');
+        logEl.textContent = `[${timeWithMs}] ${prefix}: ${JSON.stringify(payload, null, 2)}\n${logEl.textContent}`
       }
 
       const messenger = createMiniAppHostMessenger(() => iframe?.contentWindow ?? null)
-      messenger.setMessageHandler((message) => {
+      const updateStatus = () => {
         statusEl.textContent = messenger.isConnected() ? "connected" : "disconnected"
+      }
+      messenger.setMessageHandler((message) => {
+        updateStatus()
         appendLog("client → host", message)
       })
       messenger.connect()
 
-      document.getElementById("handshakeBtn").addEventListener("click", () => {
-        messenger.send("host:handshake", {
-          network: "preview",
-          theme: "light",
-          hideBalances: false,
-          explorer: "cardanoscan",
-        })
-      })
+      const hostState = {
+        theme: "light",
+        hideBalances: false,
+        explorer: "cardanoscan",
+        network: "preview",
+      }
 
-      let nextTheme = "dark"
-      document.getElementById("themeBtn").addEventListener("click", () => {
-        messenger.send("host:themeChanged", { theme: nextTheme })
-        nextTheme = nextTheme === "dark" ? "light" : "dark"
-      })
-
-      document.getElementById("urlBtn").addEventListener("click", () => {
-        messenger.send("host:tipUpdated", {
+      const hostPayloadFactories = {
+        "host:handshake": () => ({
+          network: hostState.network,
+          theme: hostState.theme,
+          hideBalances: hostState.hideBalances,
+          explorer: hostState.explorer,
+        }),
+        "host:tipUpdated": () => ({
           slot: Date.now(),
           blockHeight: Math.floor(Date.now() / 1000),
-          blockHash: "mock-hash",
+          blockHash: Math.random().toString(16).slice(2),
+        }),
+        "host:accountStateUpdated": () => ({
+          paymentAddress: "addr_test1..." + Math.random().toString(36).slice(2, 6),
+          stakingAddress: "stake_test1..." + Math.random().toString(36).slice(2, 6),
+          state: { balance: Math.floor(Math.random() * 1000_000_000) },
+          delegation: { poolId: "pool1xyz", status: "delegating" },
+        }),
+        "host:networkChanged": () => {
+          hostState.network = hostState.network === "preview" ? "mainnet" : "preview"
+          return { network: hostState.network }
+        },
+        "host:themeChanged": () => {
+          hostState.theme = hostState.theme === "light" ? "dark" : "light"
+          return { theme: hostState.theme }
+        },
+        "host:hideBalanceChanged": () => {
+          hostState.hideBalances = !hostState.hideBalances
+          return { hideBalances: hostState.hideBalances }
+        },
+        "host:explorerChanged": () => {
+          const options = ["cardanoscan", "cexplorer", "adastat"]
+          const next = options[(options.indexOf(hostState.explorer) + 1) % options.length]
+          hostState.explorer = next
+          return { explorer: hostState.explorer }
+        },
+        "host:signResponse": () => ({
+          status: "success",
+          signedTxCbor: "<signed-cbor>",
+          txHash: Math.random().toString(16).slice(2),
+        }),
+        "host:submitResponse": () => ({
+          status: "error",
+          errorMessage: "Submission rejected for demo",
+        }),
+        "host:signAndSubmitResponse": () => ({
+          status: "success",
+          txHash: Math.random().toString(16).slice(2),
+        }),
+      }
+
+      HOST_MESSAGE_TYPES.forEach((type) => {
+        const btn = document.createElement("button")
+        btn.textContent = type
+        btn.addEventListener("click", () => {
+          const payloadFactory = hostPayloadFactories[type]
+          const payload = typeof payloadFactory === "function" ? payloadFactory() : undefined
+          messenger.send(type, payload)
         })
+        controlsEl.appendChild(btn)
       })
     </script>
   </body>
