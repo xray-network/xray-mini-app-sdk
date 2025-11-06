@@ -1,0 +1,31 @@
+{
+  "name": "xray-mini-app-sdk",
+  "version": "0.1.0",
+  "description": "Core messaging utilities for building XRAY mini apps.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./src/index.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rm -rf dist",
+    "prepare": "yarn build",
+    "prepublishOnly": "yarn build"
+  },
+  "keywords": [
+    "xray",
+    "mini-app",
+    "messaging"
+  ],
+  "author": "",
+  "license": "MIT"
+}

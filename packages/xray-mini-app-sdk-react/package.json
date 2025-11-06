@@ -1,0 +1,40 @@
+{
+  "name": "xray-mini-app-sdk-react",
+  "version": "0.1.0",
+  "description": "React hooks for XRAY mini app messaging.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rm -rf dist",
+    "prepare": "yarn build",
+    "prepublishOnly": "yarn build"
+  },
+  "keywords": [
+    "xray",
+    "mini-app",
+    "react",
+    "hooks"
+  ],
+  "peerDependencies": {
+    "react": ">=17.0.0"
+  },
+  "dependencies": {
+    "xray-mini-app-sdk": "0.1.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0"
+  },
+  "author": "",
+  "license": "MIT"
+}
