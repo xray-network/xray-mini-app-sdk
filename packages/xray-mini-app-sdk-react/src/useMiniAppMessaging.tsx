@@ -12,6 +12,17 @@ import {
   type ClientMessagePayload,
 } from "xray-mini-app-sdk"
 
+export {
+  type UseMiniAppHostMessagingResult,
+  type UseMiniAppClientMessagingResult,
+  type HostMessage,
+  type ClientMessage,
+  type HostMessageType,
+  type ClientMessageType,
+  type HostMessagePayload,
+  type ClientMessagePayload,
+}
+
 export function useMiniAppHostMessaging(
   iframeRef: RefObject<HTMLIFrameElement | null>,
   onMessage: (message: ClientMessage) => void
