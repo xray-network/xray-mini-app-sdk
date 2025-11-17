@@ -1,47 +1,17 @@
 # XRAY Mini App SDK Monorepo
 
-This workspace houses two sibling packages that make it easy to integrate XRAY mini apps with a host shell:
+This repo houses the packages that let XRAY Mini Apps talk to host shells. You get a framework-agnostic JavaScript layer plus React hooks on top.
 
-- `xray-mini-app-sdk`: framework-agnostic messaging utilities, types, and constants for establishing a secure channel between a host iframe and a mini app.
-- `xray-mini-app-sdk-react`: lightweight React hooks that wrap the core messaging layer.
+- `xray-mini-app-sdk` – core messaging utilities, types, and constants for secure iframe communication.
+- `xray-mini-app-sdk-react` – React hooks that wrap the core messenger for idiomatic host and client patterns.
 
-## Getting Started
+---
 
-```bash
-yarn install
-yarn build
+# JavaScript Package
+
+```sh
+yarn add xray-mini-app-sdk
 ```
-
-Key scripts:
-
-- `yarn build` – runs `tsc` in every workspace.
-- `yarn clean` – removes `dist` folders for each package (if the package defines the script).
-- `yarn publish:core` / `yarn publish:react` – publishes the respective package to npm (`--access public` is pre-configured).
-
-## Sandboxes
-
-> Build everything first (`yarn workspaces run build`). Then run `yarn serve:core` or `yarn serve:react`, which serve
-> each package folder (so both `dist` and `sandbox` are available). Open `/sandbox/host.html` in the reported URL.
-
-### Core messaging sandbox
-
-- Files: `packages/xray-mini-app-sdk/sandbox/host.html`, `packages/xray-mini-app-sdk/sandbox/client.html`.
-- Host HTML spins up the messenger, embeds the client iframe, and exposes buttons to send handshake/theme/tip messages.
-- Client HTML listens for host events and can issue URL/signature requests back to the host.
-
-## Package Details
-
-### `xray-mini-app-sdk`
-
-- Location: `packages/xray-mini-app-sdk`
-- Exports:
-  - `createMiniAppHostMessenger(getTargetWindow)`
-  - `createMiniAppClientMessenger()`
-  - Typed helpers (`HostMessageType`, payload maps, etc.) plus constants and utility guards.
-- Build output: `dist/index.js` + type declarations via `tsc`.
-
-**Host usage example:**
-
 ```ts
 import { createMiniAppHostMessenger } from "xray-mini-app-sdk"
 
@@ -54,13 +24,22 @@ messenger.setMessageHandler((message) => {
 messenger.connect()
 ```
 
-### `xray-mini-app-sdk-react`
+- Location: `packages/xray-mini-app-sdk`
+- Build output: `dist/index.js` plus `.d.ts` files from `tsc`.
+- Key exports:
+  - `createMiniAppHostMessenger(getTargetWindow)`
+  - `createMiniAppClientMessenger()`
+  - Typed helpers (`HostMessageType`, payload maps, type guards, and constants).
 
-- Location: `packages/xray-mini-app-sdk-react`
-- Depends on `xray-mini-app-sdk` and exposes idiomatic hooks.
+The core sandbox (`yarn serve:core`) mirrors this flow by embedding the client HTML, wiring button actions to messenger calls, and echoing responses for easy debugging.
 
-**React host usage example:**
+---
 
+# React Package
+
+```sh
+yarn add xray-mini-app-sdk-react
+```
 ```tsx
 import { useRef } from "react"
 import { useMiniAppHostMessaging } from "xray-mini-app-sdk-react"
@@ -89,8 +68,6 @@ const MiniAppHost = () => {
 }
 ```
 
-**React mini-app usage example:**
-
 ```tsx
 import { useMiniAppClientMessaging } from "xray-mini-app-sdk-react"
 
@@ -105,11 +82,25 @@ const MiniApp = () => {
 }
 ```
 
+- Location: `packages/xray-mini-app-sdk-react`
+- Depends on `xray-mini-app-sdk`; React is declared as a peer dependency to avoid duplicate copies.
+- Exposes hooks like `useMiniAppHostMessaging` and `useMiniAppClientMessaging` that wrap the core messenger.
+
+---
+
+## Key scripts
+
+- `yarn install` – install dependencies. 
+- `yarn build` – runs `tsc` in every workspace.
+- `yarn clean` – removes `dist` folders for each package (if the package defines the script).
+- `yarn publish:core` / `yarn publish:react` – publishes the respective package to npm (`--access public` is pre-configured).
+
+
 ## Publishing Checklist
 
 1. Update versions in the relevant package(s).
-2. Run `yarn install` to refresh the lockfile if dependencies changed.
-3. `yarn build` to verify the emitted bundles.
-4. Use `yarn publish:core` or `yarn publish:react` (both commands call `yarn workspace <pkg> publish --access public`).
+2. Run `yarn install` if dependencies changed to refresh the lockfile.
+3. Run `yarn build` to verify the emitted bundles.
+4. Publish with `yarn publish:core` or `yarn publish:react`.
 
-Both packages ship TypeScript declarations alongside ESM builds, so they work out of the box in modern bundlers. React is declared as a peer dependency for the hook package to prevent duplicate copies in consuming apps.
+Both packages ship TypeScript declarations alongside ESM builds, so they work out of the box in modern bundlers.
