@@ -2,8 +2,6 @@ import { useCallback, useEffect, useRef, type RefObject } from "react"
 import {
   createMiniAppHostMessenger,
   createMiniAppClientMessenger,
-  type UseMiniAppHostMessagingResult,
-  type UseMiniAppClientMessagingResult,
   type HostMessage,
   type ClientMessage,
   type HostMessageType,
@@ -11,6 +9,11 @@ import {
   type HostMessagePayload,
   type ClientMessagePayload,
 } from "xray-mini-app-sdk"
+
+import {
+  type UseMiniAppHostMessagingResult,
+  type UseMiniAppClientMessagingResult,
+} from "./types.js"
 
 export * from "xray-mini-app-sdk"
 

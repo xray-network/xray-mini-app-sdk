@@ -2,6 +2,7 @@ import type { HostMessageType, ClientMessageType } from "./types.js"
 
 export const HOST_MESSAGE_TYPES = [
   "host:handshake",
+  "host:initialData",
   "host:tipUpdated",
   "host:accountStateUpdated",
   "host:networkChanged",

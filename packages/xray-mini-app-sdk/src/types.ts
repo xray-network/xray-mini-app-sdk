@@ -1,11 +1,11 @@
 import { HOST_MESSAGE_TYPES, CLIENT_MESSAGE_TYPES } from "./constants.js"
 
-type Network = "mainnet" | "preprod" | "preview"
-type Explorer = "cardanoscan" | "cexplorer" | "adastat"
-type Theme = "light" | "dark"
-type SerializableRecord = Record<string, unknown>
+export type Network = "mainnet" | "preprod" | "preview"
+export type Explorer = "cardanoscan" | "cexplorer" | "adastat"
+export type Theme = "light" | "dark"
+export type SerializableRecord = Record<string, unknown>
 
-export type HostHandshakePayload = {
+export type HostInitialDataPayload = {
   network: Network
   theme: Theme
   hideBalances: boolean
@@ -45,7 +45,8 @@ export type HostTxResponsePayload = {
 }
 
 export type HostMessagePayloadMap = {
-  "host:handshake": HostHandshakePayload
+  "host:handshake": undefined,
+  "host:initialData": HostInitialDataPayload
   "host:tipUpdated": HostTipUpdatedPayload
   "host:accountStateUpdated": HostAccountStateUpdatedPayload
   "host:networkChanged": HostNetworkChangedPayload
@@ -113,12 +114,4 @@ export type HostMessage<T extends HostMessageType = HostMessageType> = {
   type: T
   id?: string
   payload?: HostMessagePayload<T>
-}
-
-export interface UseMiniAppHostMessagingResult {
-  sendMessage: <T extends HostMessageType>(type: T, payload?: HostMessagePayload<T>) => void
-}
-
-export interface UseMiniAppClientMessagingResult {
-  sendMessage: <T extends ClientMessageType>(type: T, payload?: ClientMessagePayload<T>) => void
 }
