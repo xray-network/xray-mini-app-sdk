@@ -27,6 +27,9 @@ export function useMiniAppClientMessaging(onMessage: (message: HostMessage) => v
     if (typeof window === "undefined") return
 
     const messenger = createMiniAppClientMessenger()
+    messenger.setConnectionStateHandler((connected) => {
+      setIsConnected(connected)
+    })
     messenger.setMessageHandler((message) => {
       setIsConnected(true)
       onMessageRef.current?.(message)
@@ -37,6 +40,7 @@ export function useMiniAppClientMessaging(onMessage: (message: HostMessage) => v
 
     return () => {
       messenger.setMessageHandler(null)
+      messenger.setConnectionStateHandler(null)
       messenger.disconnect()
       messengerRef.current = null
       setIsConnected(false)

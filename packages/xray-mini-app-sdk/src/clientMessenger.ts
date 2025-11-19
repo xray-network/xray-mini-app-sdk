@@ -19,6 +19,19 @@ const createClientMessengerConnectionManager = () => {
   let handshakeListenerAttached = false
   let connectionRefCount = 0
   const messageHandlers = new Map<symbol, ClientMessengerHandler>()
+  const connectionStateHandlers = new Map<symbol, ((connected: boolean) => void) | null>()
+
+  const notifyConnectionStateHandlers = () => {
+    connectionStateHandlers.forEach((handler) => {
+      handler?.(connected)
+    })
+  }
+
+  const updateConnectedState = (state: boolean) => {
+    if (connected === state) return
+    connected = state
+    notifyConnectionStateHandlers()
+  }
 
   /** Fully resets the current MessagePort. */
   const cleanupPort = () => {
@@ -30,7 +43,7 @@ const createClientMessengerConnectionManager = () => {
       // Ignore failures when closing an already closed port
     }
     port = null
-    connected = false
+    updateConnectedState(false)
   }
 
   const dispatchMessage = (message: HostMessage) => {
@@ -46,7 +59,7 @@ const createClientMessengerConnectionManager = () => {
     const { type, payload } = data
     if (typeof type !== "string") return
     if (!isHostMessageType(type)) return
-    connected = true
+    updateConnectedState(true)
     dispatchMessage({ type, payload } as HostMessage<typeof type>)
   }
 
@@ -81,7 +94,7 @@ const createClientMessengerConnectionManager = () => {
     } catch {
       // noop - some browsers auto-start ports when using onmessage
     }
-    connected = true
+    updateConnectedState(true)
   }
 
   /** Requests that the host deliver a MessagePort via postMessage. */
@@ -155,6 +168,15 @@ const createClientMessengerConnectionManager = () => {
     messageHandlers.set(id, handler)
   }
 
+  const setConnectionHandler = (id: symbol, handler: ((connected: boolean) => void) | null) => {
+    if (!handler) {
+      connectionStateHandlers.delete(id)
+      return
+    }
+    connectionStateHandlers.set(id, handler)
+    handler(connected)
+  }
+
   const isConnected = () => connected
 
   return {
@@ -162,6 +184,7 @@ const createClientMessengerConnectionManager = () => {
     disconnectInstance,
     send,
     setHandler,
+    setConnectionHandler,
     isConnected,
   }
 }
@@ -175,6 +198,7 @@ const clientMessengerConnection = createClientMessengerConnectionManager()
  */
 export const createMiniAppClientMessenger = (): MiniAppClientMessenger => {
   const handlerId = Symbol("clientMessengerHandler")
+  const connectionHandlerId = Symbol("clientConnectionHandler")
   let instanceConnected = false
 
   const connect = () => {
@@ -187,6 +211,7 @@ export const createMiniAppClientMessenger = (): MiniAppClientMessenger => {
     if (!instanceConnected) return
     instanceConnected = false
     clientMessengerConnection.setHandler(handlerId, null)
+    clientMessengerConnection.setConnectionHandler(connectionHandlerId, null)
     clientMessengerConnection.disconnectInstance()
   }
 
@@ -198,6 +223,10 @@ export const createMiniAppClientMessenger = (): MiniAppClientMessenger => {
     clientMessengerConnection.setHandler(handlerId, handler)
   }
 
+  const setConnectionStateHandler = (handler: ((connected: boolean) => void) | null) => {
+    clientMessengerConnection.setConnectionHandler(connectionHandlerId, handler)
+  }
+
   const isConnected = () => clientMessengerConnection.isConnected()
 
   return {
@@ -205,6 +234,7 @@ export const createMiniAppClientMessenger = (): MiniAppClientMessenger => {
     disconnect,
     send,
     setMessageHandler,
+    setConnectionStateHandler,
     isConnected,
   }
 }

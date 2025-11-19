@@ -97,6 +97,7 @@ export interface MiniAppClientMessenger {
   disconnect: () => void
   send: <T extends ClientMessageType>(type: T, payload?: ClientMessagePayload<T>) => boolean
   setMessageHandler: (handler: ((message: HostMessage) => void) | null) => void
+  setConnectionStateHandler: (handler: ((connected: boolean) => void) | null) => void
   isConnected: () => boolean
 }
 
