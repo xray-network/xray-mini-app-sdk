@@ -107,13 +107,13 @@ export type ClientMessageType = (typeof CLIENT_MESSAGE_TYPES)[number]
 type ClientMessageBase<T extends ClientMessageType> = {
   type: T
   id?: string
-  payload?: ClientMessagePayload<T>
+  payload: ClientMessagePayload<T>
 }
 
 type HostMessageBase<T extends HostMessageType> = {
   type: T
   id?: string
-  payload?: HostMessagePayload<T>
+  payload: HostMessagePayload<T>
 }
 
 export type ClientMessage<T extends ClientMessageType = ClientMessageType> = T extends ClientMessageType
