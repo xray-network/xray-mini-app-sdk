@@ -5,13 +5,6 @@ export type Explorer = "cardanoscan" | "cexplorer" | "adastat"
 export type Theme = "light" | "dark"
 export type SerializableRecord = Record<string, unknown>
 
-export type HostInitialDataPayload = {
-  network: Network
-  theme: Theme
-  hideBalances: boolean
-  explorer: Explorer
-}
-
 export type HostTipUpdatedPayload = SerializableRecord
 
 export type HostAccountStateUpdatedPayload = {
@@ -23,6 +16,10 @@ export type HostAccountStateUpdatedPayload = {
 
 export type HostThemeChangedPayload = {
   theme: "light" | "dark"
+}
+
+export type HostCurrencyChangedPayload = {
+  currency: "usd" | "eur" | "gbp" | "jpy" | "cny" 
 }
 
 export type HostNetworkChangedPayload = {
@@ -45,16 +42,16 @@ export type HostTxResponsePayload = {
 }
 
 export type HostMessagePayloadMap = {
-  "host:initialData": HostInitialDataPayload
-  "host:tipUpdated": HostTipUpdatedPayload
-  "host:accountStateUpdated": HostAccountStateUpdatedPayload
-  "host:networkChanged": HostNetworkChangedPayload
-  "host:themeChanged": HostThemeChangedPayload
-  "host:hideBalanceChanged": HostHideBalanceChangedPayload
-  "host:explorerChanged": HostExplorerChangedPayload
-  "host:signResponse": HostTxResponsePayload
-  "host:submitResponse": HostTxResponsePayload
-  "host:signAndSubmitResponse": HostTxResponsePayload
+  "tipUpdated": HostTipUpdatedPayload
+  "accountStateUpdated": HostAccountStateUpdatedPayload
+  "networkChanged": HostNetworkChangedPayload
+  "themeChanged": HostThemeChangedPayload
+  "currencyChanged": HostCurrencyChangedPayload
+  "hideBalanceChanged": HostHideBalanceChangedPayload
+  "explorerChanged": HostExplorerChangedPayload
+  "signResponse": HostTxResponsePayload
+  "submitResponse": HostTxResponsePayload
+  "signAndSubmitResponse": HostTxResponsePayload
 }
 
 export type ClientNavigationUrlChangedPayload = {
@@ -74,10 +71,10 @@ export type ClientTxSignAndSubmitRequestPayload = {
 }
 
 export type ClientMessagePayloadMap = {
-  "client:urlChanged": ClientNavigationUrlChangedPayload
-  "client:signRequest": ClientTxSignRequestPayload
-  "client:submitRequest": ClientTxSubmitRequestPayload
-  "client:signAndSubmitRequest": ClientTxSignAndSubmitRequestPayload
+  "urlChanged": ClientNavigationUrlChangedPayload
+  "signRequest": ClientTxSignRequestPayload
+  "submitRequest": ClientTxSubmitRequestPayload
+  "signAndSubmitRequest": ClientTxSignAndSubmitRequestPayload
 }
 
 export type HostMessagePayload<T extends HostMessageType> = HostMessagePayloadMap[T]

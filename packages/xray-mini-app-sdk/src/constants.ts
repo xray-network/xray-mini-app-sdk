@@ -1,23 +1,23 @@
 import type { HostMessageType, ClientMessageType } from "./types.js"
 
 export const HOST_MESSAGE_TYPES = [
-  "host:initialData",
-  "host:tipUpdated",
-  "host:accountStateUpdated",
-  "host:networkChanged",
-  "host:themeChanged",
-  "host:hideBalanceChanged",
-  "host:explorerChanged",
-  "host:signResponse",
-  "host:submitResponse",
-  "host:signAndSubmitResponse",
+  "tipUpdated",
+  "accountStateUpdated",
+  "networkChanged",
+  "themeChanged",
+  "currencyChanged",
+  "hideBalanceChanged",
+  "explorerChanged",
+  "signResponse",
+  "submitResponse",
+  "signAndSubmitResponse",
 ] as const
 
 export const CLIENT_MESSAGE_TYPES = [
-  "client:urlChanged",
-  "client:signRequest",
-  "client:submitRequest",
-  "client:signAndSubmitRequest",
+  "urlChanged",
+  "signRequest",
+  "submitRequest",
+  "signAndSubmitRequest",
 ] as const
 
 export const HOST_ALLOWED_MESSAGE_TYPES = new Set<string>([...HOST_MESSAGE_TYPES])
