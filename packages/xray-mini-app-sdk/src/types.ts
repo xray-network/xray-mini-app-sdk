@@ -104,16 +104,24 @@ export interface MiniAppClientMessenger {
 export type HostMessageType = (typeof HOST_MESSAGE_TYPES)[number]
 export type ClientMessageType = (typeof CLIENT_MESSAGE_TYPES)[number]
 
-export type ClientMessage<T extends ClientMessageType = ClientMessageType> = {
+type ClientMessageBase<T extends ClientMessageType> = {
   type: T
   id?: string
   payload?: ClientMessagePayload<T>
 }
 
-export type HostMessage<T extends HostMessageType = HostMessageType> = {
+type HostMessageBase<T extends HostMessageType> = {
   type: T
   id?: string
   payload?: HostMessagePayload<T>
 }
+
+export type ClientMessage<T extends ClientMessageType = ClientMessageType> = T extends ClientMessageType
+  ? ClientMessageBase<T>
+  : never
+
+export type HostMessage<T extends HostMessageType = HostMessageType> = T extends HostMessageType
+  ? HostMessageBase<T>
+  : never
 
 export type ClientMessengerHandler = ((message: HostMessage) => void) | null
