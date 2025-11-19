@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import {
   createMiniAppClientMessenger,
   type HostMessage,
@@ -15,6 +15,7 @@ import { type UseMiniAppClientMessagingResult } from "./types.js"
 export function useMiniAppClientMessaging(onMessage: (message: HostMessage) => void): UseMiniAppClientMessagingResult {
   const onMessageRef = useRef(onMessage)
   const messengerRef = useRef<ReturnType<typeof createMiniAppClientMessenger> | null>(null)
+  const [isConnected, setIsConnected] = useState(false)
 
   // Store latest callback in a ref so we do not recreate messenger handlers unnecessarily.
   useEffect(() => {
@@ -27,15 +28,18 @@ export function useMiniAppClientMessaging(onMessage: (message: HostMessage) => v
 
     const messenger = createMiniAppClientMessenger()
     messenger.setMessageHandler((message) => {
+      setIsConnected(true)
       onMessageRef.current?.(message)
     })
     messenger.connect()
     messengerRef.current = messenger
+    setIsConnected(messenger.isConnected())
 
     return () => {
       messenger.setMessageHandler(null)
       messenger.disconnect()
       messengerRef.current = null
+      setIsConnected(false)
     }
   }, [])
 
@@ -43,5 +47,5 @@ export function useMiniAppClientMessaging(onMessage: (message: HostMessage) => v
     messengerRef.current?.send(type, payload)
   }, [])
 
-  return { sendMessage }
+  return { sendMessage, isConnected }
 }

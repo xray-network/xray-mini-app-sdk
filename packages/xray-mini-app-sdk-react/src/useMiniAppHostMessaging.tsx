@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, type RefObject } from "react"
+import { useCallback, useEffect, useRef, useState, type RefObject } from "react"
 import {
   createMiniAppHostMessenger,
   type ClientMessage,
@@ -18,6 +18,7 @@ export function useMiniAppHostMessaging(
 ): UseMiniAppHostMessagingResult {
   const onMessageRef = useRef(onMessage)
   const messengerRef = useRef<ReturnType<typeof createMiniAppHostMessenger> | null>(null)
+  const [isConnected, setIsConnected] = useState(false)
 
   // Always keep the latest callback so the messenger handler stays stable.
   useEffect(() => {
@@ -28,19 +29,25 @@ export function useMiniAppHostMessaging(
   useEffect(() => {
     if (typeof window === "undefined") return
     const iframe = iframeRef.current
-    if (!iframe) return
+    if (!iframe) {
+      setIsConnected(false)
+      return
+    }
 
     const messenger = createMiniAppHostMessenger(() => iframe.contentWindow ?? null)
     messenger.setMessageHandler((message) => {
+      setIsConnected(true)
       onMessageRef.current?.(message)
     })
     messenger.connect()
     messengerRef.current = messenger
+    setIsConnected(messenger.isConnected())
 
     return () => {
       messenger.setMessageHandler(null)
       messenger.disconnect()
       messengerRef.current = null
+      setIsConnected(false)
     }
   }, [iframeRef, iframeRef.current])
 
@@ -48,5 +55,5 @@ export function useMiniAppHostMessaging(
     messengerRef.current?.send(type, payload)
   }, [])
 
-  return { sendMessage }
+  return { sendMessage, isConnected }
 }

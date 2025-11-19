@@ -7,8 +7,10 @@ import {
 
 export interface UseMiniAppHostMessagingResult {
   sendMessage: <T extends HostMessageType>(type: T, payload?: HostMessagePayload<T>) => void
+  isConnected: boolean
 }
 
 export interface UseMiniAppClientMessagingResult {
   sendMessage: <T extends ClientMessageType>(type: T, payload?: ClientMessagePayload<T>) => void
+  isConnected: boolean
 }
