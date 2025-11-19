@@ -93,7 +93,6 @@
       updateStatus()
 
       const clientPayloadFactories = {
-        "client:handshake": () => undefined,
         "client:urlChanged": () => ({ url: window.location.href }),
         "client:signRequest": () => ({
           unsignedTxCbor: "<mock unsigned tx cbor>",

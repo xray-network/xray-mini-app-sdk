@@ -45,7 +45,6 @@ export type HostTxResponsePayload = {
 }
 
 export type HostMessagePayloadMap = {
-  "host:handshake": undefined
   "host:initialData": HostInitialDataPayload
   "host:tipUpdated": HostTipUpdatedPayload
   "host:accountStateUpdated": HostAccountStateUpdatedPayload
@@ -75,7 +74,6 @@ export type ClientTxSignAndSubmitRequestPayload = {
 }
 
 export type ClientMessagePayloadMap = {
-  "client:handshake": undefined
   "client:urlChanged": ClientNavigationUrlChangedPayload
   "client:signRequest": ClientTxSignRequestPayload
   "client:submitRequest": ClientTxSubmitRequestPayload
@@ -90,6 +88,7 @@ export interface MiniAppHostMessenger {
   disconnect: () => void
   send: <T extends HostMessageType>(type: T, payload?: HostMessagePayload<T>) => boolean
   setMessageHandler: (handler: ((message: ClientMessage) => void) | null) => void
+  setConnectionStateHandler: (handler: ((connected: boolean) => void) | null) => void
   isConnected: () => boolean
 }
 

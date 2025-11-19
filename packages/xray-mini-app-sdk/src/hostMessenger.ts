@@ -1,4 +1,4 @@
-import { MINI_APP_SDK_FLAG, CHANNEL_TRANSFER, CHANNEL_REQUEST, HOST_HANDSHAKE_TYPE } from "./constants.js"
+import { MINI_APP_SDK_FLAG, CHANNEL_TRANSFER, CHANNEL_REQUEST } from "./constants.js"
 import { isRecord, isMiniAppSdkEvent, isClientMessageType, isHostMessageType } from "./utils.js"
 import type { ClientMessage, HostMessage, HostMessageType, HostMessagePayload, MiniAppHostMessenger } from "./types.js"
 
@@ -13,7 +13,14 @@ export const createMiniAppHostMessenger = (getTargetWindow: () => Window | null)
   let port: MessagePort | null = null
   let connected = false
   let messageHandler: ((message: ClientMessage) => void) | null = null
+  let connectionStateHandler: ((connected: boolean) => void) | null = null
   let handshakeListenerAttached = false
+
+  const updateConnectedState = (state: boolean) => {
+    if (connected === state) return
+    connected = state
+    connectionStateHandler?.(connected)
+  }
 
   /** Closes the existing MessagePort and resets connection state. */
   const cleanupPort = () => {
@@ -25,7 +32,7 @@ export const createMiniAppHostMessenger = (getTargetWindow: () => Window | null)
       // Ignore failures when closing an already closed port
     }
     port = null
-    connected = false
+    updateConnectedState(false)
   }
 
   /** Pushes incoming client messages to the handler once the channel is established. */
@@ -35,7 +42,7 @@ export const createMiniAppHostMessenger = (getTargetWindow: () => Window | null)
     const { type, payload } = data
     if (typeof type !== "string") return
     if (!isClientMessageType(type)) return
-    connected = true
+    updateConnectedState(true)
     messageHandler?.({ type, payload } as ClientMessage<typeof type>)
   }
 
@@ -56,10 +63,9 @@ export const createMiniAppHostMessenger = (getTargetWindow: () => Window | null)
     } catch {
       // noop - some browsers auto-start ports when using onmessage
     }
-
     try {
       targetWindow.postMessage({ [MINI_APP_SDK_FLAG]: CHANNEL_TRANSFER }, "*", [channel.port2])
-      port.postMessage({ type: HOST_HANDSHAKE_TYPE })
+      updateConnectedState(true)
     } catch (error) {
       cleanupPort()
       throw error
@@ -114,6 +120,13 @@ export const createMiniAppHostMessenger = (getTargetWindow: () => Window | null)
     messageHandler = handler
   }
 
+  const setConnectionStateHandler = (handler: ((connected: boolean) => void) | null) => {
+    connectionStateHandler = handler
+    if (handler) {
+      handler(connected)
+    }
+  }
+
   const isConnected = () => connected
 
   return {
@@ -121,6 +134,7 @@ export const createMiniAppHostMessenger = (getTargetWindow: () => Window | null)
     disconnect,
     send,
     setMessageHandler,
+    setConnectionStateHandler,
     isConnected,
   }
 }

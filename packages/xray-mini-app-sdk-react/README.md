@@ -26,7 +26,7 @@ const MiniAppHost = () => {
       ref={iframeRef}
       src="https://mini-app.example.com"
       onLoad={() =>
-        sendMessage("host:handshake", {
+        sendMessage("host:initialData", {
           network: "mainnet",
           explorer: "cardanoscan",
           theme: "light",

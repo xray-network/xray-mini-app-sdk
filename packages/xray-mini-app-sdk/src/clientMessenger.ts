@@ -1,4 +1,4 @@
-import { MINI_APP_SDK_FLAG, CHANNEL_TRANSFER, CHANNEL_REQUEST, CLIENT_HANDSHAKE_TYPE } from "./constants.js"
+import { MINI_APP_SDK_FLAG, CHANNEL_TRANSFER, CHANNEL_REQUEST } from "./constants.js"
 import { getParentWindow, isRecord, isMiniAppSdkEvent, isHostMessageType, isClientMessageType } from "./utils.js"
 import type {
   ClientMessage,
@@ -82,17 +82,6 @@ const createClientMessengerConnectionManager = () => {
       // noop - some browsers auto-start ports when using onmessage
     }
     connected = true
-    try {
-      port.postMessage({ type: CLIENT_HANDSHAKE_TYPE })
-    } catch {
-      // Ignore failures if the port rejects the handshake
-      connected = false
-      cleanupPort()
-      if (connectionRefCount > 0) {
-        requestPortFromHost()
-      }
-      return
-    }
   }
 
   /** Requests that the host deliver a MessagePort via postMessage. */

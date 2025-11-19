@@ -35,6 +35,9 @@ export function useMiniAppHostMessaging(
     }
 
     const messenger = createMiniAppHostMessenger(() => iframe.contentWindow ?? null)
+    messenger.setConnectionStateHandler((connected) => {
+      setIsConnected(connected)
+    })
     messenger.setMessageHandler((message) => {
       setIsConnected(true)
       onMessageRef.current?.(message)
@@ -45,6 +48,7 @@ export function useMiniAppHostMessaging(
 
     return () => {
       messenger.setMessageHandler(null)
+      messenger.setConnectionStateHandler(null)
       messenger.disconnect()
       messengerRef.current = null
       setIsConnected(false)
