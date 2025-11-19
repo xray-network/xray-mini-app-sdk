@@ -4,6 +4,7 @@ import type {
   ClientMessage,
   ClientMessageType,
   ClientMessagePayload,
+  ClientMessengerHandler,
   HostMessage,
   HostMessageType,
   HostMessagePayload,
@@ -113,11 +114,12 @@ export const createMiniAppHostMessenger = (getTargetWindow: () => Window | null)
   }
 }
 
-export const createMiniAppClientMessenger = (): MiniAppClientMessenger => {
+const createClientMessengerConnectionManager = () => {
   let port: MessagePort | null = null
   let connected = false
-  let messageHandler: ((message: HostMessage) => void) | null = null
   let handshakeListenerAttached = false
+  let connectionRefCount = 0
+  const messageHandlers = new Map<symbol, ClientMessengerHandler>()
 
   const cleanupPort = () => {
     if (!port) return
@@ -131,6 +133,12 @@ export const createMiniAppClientMessenger = (): MiniAppClientMessenger => {
     connected = false
   }
 
+  const dispatchMessage = (message: HostMessage) => {
+    messageHandlers.forEach((handler) => {
+      handler?.(message)
+    })
+  }
+
   const handlePortMessage = (event: MessageEvent<HostMessage>) => {
     const data = event.data
     if (!isRecord(data)) return
@@ -138,7 +146,7 @@ export const createMiniAppClientMessenger = (): MiniAppClientMessenger => {
     if (typeof type !== "string") return
     if (!isHostMessageType(type)) return
     connected = true
-    messageHandler?.({ type, payload } as HostMessage<typeof type>)
+    dispatchMessage({ type, payload } as HostMessage<typeof type>)
   }
 
   const handlePortTransfer = (event: MessageEvent) => {
@@ -153,9 +161,13 @@ export const createMiniAppClientMessenger = (): MiniAppClientMessenger => {
 
     const incomingPort = event.ports?.[0]
     if (!incomingPort) {
+      if (connectionRefCount > 0) {
+        requestPortFromHost()
+      }
       return
     }
 
+    // All message handlers share the same port, so older connections can be safely discarded
     cleanupPort()
     port = incomingPort
     port.onmessage = handlePortMessage
@@ -170,30 +182,51 @@ export const createMiniAppClientMessenger = (): MiniAppClientMessenger => {
     } catch {
       // Ignore failures if the port rejects the handshake
       connected = false
+      cleanupPort()
+      if (connectionRefCount > 0) {
+        requestPortFromHost()
+      }
+      return
     }
   }
 
   const requestPortFromHost = () => {
     const parentWindow = getParentWindow()
     if (!parentWindow) return
-    parentWindow.postMessage({ [MINI_APP_SDK_FLAG]: CHANNEL_REQUEST }, "*")
+    try {
+      parentWindow.postMessage({ [MINI_APP_SDK_FLAG]: CHANNEL_REQUEST }, "*")
+    } catch {
+    }
   }
 
-  const connect = () => {
+  const attachHandshakeListener = () => {
+    if (handshakeListenerAttached || typeof window === "undefined") return
+    window.addEventListener("message", handlePortTransfer)
+    handshakeListenerAttached = true
+  }
+
+  const detachHandshakeListener = () => {
+    if (!handshakeListenerAttached || typeof window === "undefined") return
+    window.removeEventListener("message", handlePortTransfer)
+    handshakeListenerAttached = false
+  }
+
+  const connectInstance = () => {
     if (typeof window === "undefined") return
-    if (!handshakeListenerAttached) {
-      window.addEventListener("message", handlePortTransfer)
-      handshakeListenerAttached = true
+    connectionRefCount += 1
+    attachHandshakeListener()
+    if (!port) {
+      requestPortFromHost()
     }
-    requestPortFromHost()
   }
 
-  const disconnect = () => {
-    if (handshakeListenerAttached && typeof window !== "undefined") {
-      window.removeEventListener("message", handlePortTransfer)
-      handshakeListenerAttached = false
+  const disconnectInstance = () => {
+    if (connectionRefCount === 0) return
+    connectionRefCount -= 1
+    if (connectionRefCount === 0) {
+      detachHandshakeListener()
+      cleanupPort()
     }
-    cleanupPort()
   }
 
   const send = <T extends ClientMessageType>(type: T, payload?: ClientMessagePayload<T>) => {
@@ -204,11 +237,53 @@ export const createMiniAppClientMessenger = (): MiniAppClientMessenger => {
     return true
   }
 
-  const setMessageHandler = (handler: ((message: HostMessage) => void) | null) => {
-    messageHandler = handler
+  const setHandler = (id: symbol, handler: ClientMessengerHandler) => {
+    if (!handler) {
+      messageHandlers.delete(id)
+      return
+    }
+    messageHandlers.set(id, handler)
   }
 
   const isConnected = () => connected
+
+  return {
+    connectInstance,
+    disconnectInstance,
+    send,
+    setHandler,
+    isConnected,
+  }
+}
+
+const clientMessengerConnection = createClientMessengerConnectionManager()
+
+export const createMiniAppClientMessenger = (): MiniAppClientMessenger => {
+  const handlerId = Symbol("clientMessengerHandler")
+  let instanceConnected = false
+
+  const connect = () => {
+    if (instanceConnected) return
+    instanceConnected = true
+    clientMessengerConnection.connectInstance()
+  }
+
+  const disconnect = () => {
+    if (!instanceConnected) return
+    instanceConnected = false
+    clientMessengerConnection.setHandler(handlerId, null)
+    clientMessengerConnection.disconnectInstance()
+  }
+
+  const send = <T extends ClientMessageType>(type: T, payload?: ClientMessagePayload<T>) => {
+    return clientMessengerConnection.send(type, payload)
+  }
+
+  const setMessageHandler = (handler: ((message: HostMessage) => void) | null) => {
+    clientMessengerConnection.setHandler(handlerId, handler)
+  }
+
+  const isConnected = () => clientMessengerConnection.isConnected()
 
   return {
     connect,

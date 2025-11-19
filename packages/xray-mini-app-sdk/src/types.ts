@@ -115,3 +115,5 @@ export type HostMessage<T extends HostMessageType = HostMessageType> = {
   id?: string
   payload?: HostMessagePayload<T>
 }
+
+export type ClientMessengerHandler = ((message: HostMessage) => void) | null
