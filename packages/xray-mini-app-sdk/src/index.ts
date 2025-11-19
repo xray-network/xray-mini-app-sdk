@@ -1,4 +1,5 @@
-export * from "./messaging.js"
+export * from "./clientMessenger.js"
+export * from "./hostMessenger.js"
 export * from "./constants.js"
 export * from "./utils.js"
 export * from "./types.js"

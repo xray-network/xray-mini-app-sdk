@@ -1,119 +1,29 @@
-import { MINI_APP_SDK_FLAG, CHANNEL_TRANSFER, CHANNEL_REQUEST, CLIENT_HANDSHAKE_TYPE, HOST_HANDSHAKE_TYPE } from "./constants.js"
-import { isClientMessageType, isHostMessageType, isRecord, isMiniAppSdkEvent, getParentWindow } from "./utils.js"
+import {
+  MINI_APP_SDK_FLAG,
+  CHANNEL_TRANSFER,
+  CHANNEL_REQUEST,
+  CLIENT_HANDSHAKE_TYPE,
+} from "./constants.js"
+import {
+  getParentWindow,
+  isRecord,
+  isMiniAppSdkEvent,
+  isHostMessageType,
+  isClientMessageType,
+} from "./utils.js"
 import type {
   ClientMessage,
-  ClientMessageType,
   ClientMessagePayload,
+  ClientMessageType,
   ClientMessengerHandler,
   HostMessage,
-  HostMessageType,
-  HostMessagePayload,
-  MiniAppHostMessenger,
   MiniAppClientMessenger,
 } from "./types.js"
 
-export const createMiniAppHostMessenger = (getTargetWindow: () => Window | null): MiniAppHostMessenger => {
-  let port: MessagePort | null = null
-  let connected = false
-  let messageHandler: ((message: ClientMessage) => void) | null = null
-  let handshakeListenerAttached = false
-
-  const cleanupPort = () => {
-    if (!port) return
-    port.onmessage = null
-    try {
-      port.close()
-    } catch {
-      // Ignore failures when closing an already closed port
-    }
-    port = null
-    connected = false
-  }
-
-  const handlePortMessage = (event: MessageEvent<ClientMessage>) => {
-    const data = event.data
-    if (!isRecord(data)) return
-    const { type, payload } = data
-    if (typeof type !== "string") return
-    if (!isClientMessageType(type)) return
-    connected = true
-    messageHandler?.({ type, payload } as ClientMessage<typeof type>)
-  }
-
-  const establishPort = () => {
-    const targetWindow = getTargetWindow()
-    if (!targetWindow) return
-
-    cleanupPort()
-    const channel = new MessageChannel()
-    port = channel.port1
-    port.onmessage = handlePortMessage
-    try {
-      port.start()
-    } catch {
-      // noop - some browsers auto-start ports when using onmessage
-    }
-
-    try {
-      targetWindow.postMessage({ [MINI_APP_SDK_FLAG]: CHANNEL_TRANSFER }, "*", [channel.port2])
-      port.postMessage({ type: HOST_HANDSHAKE_TYPE })
-    } catch (error) {
-      cleanupPort()
-      throw error
-    }
-  }
-
-  const handleHandshakeRequest = (event: MessageEvent) => {
-    const targetWindow = getTargetWindow()
-    if (!targetWindow || event.source !== targetWindow) {
-      return
-    }
-
-    if (!isMiniAppSdkEvent(event.data, CHANNEL_REQUEST)) {
-      return
-    }
-
-    establishPort()
-  }
-
-  const connect = () => {
-    if (typeof window === "undefined") return
-    if (handshakeListenerAttached) return
-    window.addEventListener("message", handleHandshakeRequest)
-    handshakeListenerAttached = true
-  }
-
-  const disconnect = () => {
-    if (handshakeListenerAttached && typeof window !== "undefined") {
-      window.removeEventListener("message", handleHandshakeRequest)
-      handshakeListenerAttached = false
-    }
-    cleanupPort()
-  }
-
-  const send = <T extends HostMessageType>(type: T, payload?: HostMessagePayload<T>) => {
-    if (!isHostMessageType(type)) return false
-    if (!port) return false
-    const message = (payload === undefined ? { type } : { type, payload }) as HostMessage<T>
-    port.postMessage(message)
-    return true
-  }
-
-  const setMessageHandler = (handler: ((message: ClientMessage) => void) | null) => {
-    messageHandler = handler
-  }
-
-  const isConnected = () => connected
-
-  return {
-    connect,
-    disconnect,
-    send,
-    setMessageHandler,
-    isConnected,
-  }
-}
-
+/**
+ * One shared connection manager keeps a single MessagePort alive and fans out
+ * incoming HostMessage objects to every active client messenger instance.
+ */
 const createClientMessengerConnectionManager = () => {
   let port: MessagePort | null = null
   let connected = false
@@ -121,6 +31,7 @@ const createClientMessengerConnectionManager = () => {
   let connectionRefCount = 0
   const messageHandlers = new Map<symbol, ClientMessengerHandler>()
 
+  /** Fully resets the current MessagePort. */
   const cleanupPort = () => {
     if (!port) return
     port.onmessage = null
@@ -139,6 +50,7 @@ const createClientMessengerConnectionManager = () => {
     })
   }
 
+  /** Handles messages arriving from the host via the current port. */
   const handlePortMessage = (event: MessageEvent<HostMessage>) => {
     const data = event.data
     if (!isRecord(data)) return
@@ -149,6 +61,10 @@ const createClientMessengerConnectionManager = () => {
     dispatchMessage({ type, payload } as HostMessage<typeof type>)
   }
 
+  /**
+   * Accepts a transferred MessagePort from the host and performs the client handshake.
+   * If the host did not attach a port, another request is triggered.
+   */
   const handlePortTransfer = (event: MessageEvent) => {
     const parentWindow = getParentWindow()
     if (!parentWindow || event.source !== parentWindow) {
@@ -190,12 +106,14 @@ const createClientMessengerConnectionManager = () => {
     }
   }
 
+  /** Requests that the host deliver a MessagePort via postMessage. */
   const requestPortFromHost = () => {
     const parentWindow = getParentWindow()
     if (!parentWindow) return
     try {
       parentWindow.postMessage({ [MINI_APP_SDK_FLAG]: CHANNEL_REQUEST }, "*")
     } catch {
+      // Ignore failures - a follow-up request will be triggered on reconnect
     }
   }
 
@@ -211,6 +129,10 @@ const createClientMessengerConnectionManager = () => {
     handshakeListenerAttached = false
   }
 
+  /**
+   * Increments the consumer count and initiates the connection if needed.
+   * Every messenger instance shares the same underlying MessagePort.
+   */
   const connectInstance = () => {
     if (typeof window === "undefined") return
     connectionRefCount += 1
@@ -220,6 +142,9 @@ const createClientMessengerConnectionManager = () => {
     }
   }
 
+  /**
+   * Decrements the consumer count and tears down the connection when the last instance disconnects.
+   */
   const disconnectInstance = () => {
     if (connectionRefCount === 0) return
     connectionRefCount -= 1
@@ -229,6 +154,9 @@ const createClientMessengerConnectionManager = () => {
     }
   }
 
+  /**
+   * Sends a client message if a port is available and the type is valid.
+   */
   const send = <T extends ClientMessageType>(type: T, payload?: ClientMessagePayload<T>) => {
     if (!isClientMessageType(type)) return false
     if (!port) return false
@@ -237,7 +165,11 @@ const createClientMessengerConnectionManager = () => {
     return true
   }
 
-  const setHandler = (id: symbol, handler: ClientMessengerHandler) => {
+  /**
+   * Registers or removes the callback for a specific messenger instance.
+   * When handler is nullish, it removes the handler to avoid memory leaks.
+   */
+  const setHandler = (id: symbol, handler: ClientMessengerHandler | null) => {
     if (!handler) {
       messageHandlers.delete(id)
       return
@@ -258,6 +190,11 @@ const createClientMessengerConnectionManager = () => {
 
 const clientMessengerConnection = createClientMessengerConnectionManager()
 
+/**
+ * Creates a messenger that runs inside the mini app iframe.
+ * Many feature hooks/components can call this factory, yet they all share a single connection
+ * managed by clientMessengerConnection to avoid spawning multiple ports.
+ */
 export const createMiniAppClientMessenger = (): MiniAppClientMessenger => {
   const handlerId = Symbol("clientMessengerHandler")
   let instanceConnected = false
