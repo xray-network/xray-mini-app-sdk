@@ -5,7 +5,6 @@ import {
   type ClientMessagePayload,
 } from "xray-mini-app-sdk"
 
-
 export interface UseMiniAppHostMessagingResult {
   sendMessage: <T extends HostMessageType>(type: T, payload?: HostMessagePayload<T>) => void
 }

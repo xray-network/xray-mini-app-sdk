@@ -1,17 +1,6 @@
-import {
-  MINI_APP_SDK_FLAG,
-  CHANNEL_TRANSFER,
-  CHANNEL_REQUEST,
-  HOST_HANDSHAKE_TYPE,
-} from "./constants.js"
+import { MINI_APP_SDK_FLAG, CHANNEL_TRANSFER, CHANNEL_REQUEST, HOST_HANDSHAKE_TYPE } from "./constants.js"
 import { isRecord, isMiniAppSdkEvent, isClientMessageType, isHostMessageType } from "./utils.js"
-import type {
-  ClientMessage,
-  HostMessage,
-  HostMessageType,
-  HostMessagePayload,
-  MiniAppHostMessenger,
-} from "./types.js"
+import type { ClientMessage, HostMessage, HostMessageType, HostMessagePayload, MiniAppHostMessenger } from "./types.js"
 
 /**
  * Creates a messenger that lives inside the host application (the page that embeds the mini app).
@@ -20,9 +9,7 @@ import type {
  *
  * @param getTargetWindow - Returns the window that receives messages (usually the iframe contentWindow)
  */
-export const createMiniAppHostMessenger = (
-  getTargetWindow: () => Window | null,
-): MiniAppHostMessenger => {
+export const createMiniAppHostMessenger = (getTargetWindow: () => Window | null): MiniAppHostMessenger => {
   let port: MessagePort | null = null
   let connected = false
   let messageHandler: ((message: ClientMessage) => void) | null = null

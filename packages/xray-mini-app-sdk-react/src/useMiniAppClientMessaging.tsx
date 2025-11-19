@@ -12,9 +12,7 @@ import { type UseMiniAppClientMessagingResult } from "./types.js"
  * Hook for mini apps running inside the iframe. It hides the shared messenger connection manager
  * and exposes a minimal API tailored for components.
  */
-export function useMiniAppClientMessaging(
-  onMessage: (message: HostMessage) => void,
-): UseMiniAppClientMessagingResult {
+export function useMiniAppClientMessaging(onMessage: (message: HostMessage) => void): UseMiniAppClientMessagingResult {
   const onMessageRef = useRef(onMessage)
   const messengerRef = useRef<ReturnType<typeof createMiniAppClientMessenger> | null>(null)
 
@@ -41,12 +39,9 @@ export function useMiniAppClientMessaging(
     }
   }, [])
 
-  const sendMessage = useCallback(
-    <T extends ClientMessageType>(type: T, payload?: ClientMessagePayload<T>) => {
-      messengerRef.current?.send(type, payload)
-    },
-    [],
-  )
+  const sendMessage = useCallback(<T extends ClientMessageType>(type: T, payload?: ClientMessagePayload<T>) => {
+    messengerRef.current?.send(type, payload)
+  }, [])
 
   return { sendMessage }
 }

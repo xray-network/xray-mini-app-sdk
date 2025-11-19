@@ -9,11 +9,10 @@ Framework-agnostic tooling that lets XRAY Mini Apps talk to host shells, plus Re
 
 ## Key scripts
 
-- `yarn install` – install dependencies. 
+- `yarn install` – install dependencies.
 - `yarn build` – runs `tsc` in every workspace.
 - `yarn clean` – removes `dist` folders for each package (if the package defines the script).
 - `yarn publish:core` / `yarn publish:react` – publishes the respective package to npm (`--access public` is pre-configured).
-
 
 ## Publishing Checklist
 

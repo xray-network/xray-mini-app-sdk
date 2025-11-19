@@ -1,16 +1,5 @@
-import {
-  MINI_APP_SDK_FLAG,
-  CHANNEL_TRANSFER,
-  CHANNEL_REQUEST,
-  CLIENT_HANDSHAKE_TYPE,
-} from "./constants.js"
-import {
-  getParentWindow,
-  isRecord,
-  isMiniAppSdkEvent,
-  isHostMessageType,
-  isClientMessageType,
-} from "./utils.js"
+import { MINI_APP_SDK_FLAG, CHANNEL_TRANSFER, CHANNEL_REQUEST, CLIENT_HANDSHAKE_TYPE } from "./constants.js"
+import { getParentWindow, isRecord, isMiniAppSdkEvent, isHostMessageType, isClientMessageType } from "./utils.js"
 import type {
   ClientMessage,
   ClientMessagePayload,

@@ -45,7 +45,7 @@ export type HostTxResponsePayload = {
 }
 
 export type HostMessagePayloadMap = {
-  "host:handshake": undefined,
+  "host:handshake": undefined
   "host:initialData": HostInitialDataPayload
   "host:tipUpdated": HostTipUpdatedPayload
   "host:accountStateUpdated": HostAccountStateUpdatedPayload

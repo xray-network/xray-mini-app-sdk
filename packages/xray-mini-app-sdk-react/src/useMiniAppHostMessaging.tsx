@@ -14,7 +14,7 @@ import { type UseMiniAppHostMessagingResult } from "./types.js"
  */
 export function useMiniAppHostMessaging(
   iframeRef: RefObject<HTMLIFrameElement | null>,
-  onMessage: (message: ClientMessage) => void,
+  onMessage: (message: ClientMessage) => void
 ): UseMiniAppHostMessagingResult {
   const onMessageRef = useRef(onMessage)
   const messengerRef = useRef<ReturnType<typeof createMiniAppHostMessenger> | null>(null)
@@ -44,12 +44,9 @@ export function useMiniAppHostMessaging(
     }
   }, [iframeRef, iframeRef.current])
 
-  const sendMessage = useCallback(
-    <T extends HostMessageType>(type: T, payload?: HostMessagePayload<T>) => {
-      messengerRef.current?.send(type, payload)
-    },
-    [],
-  )
+  const sendMessage = useCallback(<T extends HostMessageType>(type: T, payload?: HostMessagePayload<T>) => {
+    messengerRef.current?.send(type, payload)
+  }, [])
 
   return { sendMessage }
 }
