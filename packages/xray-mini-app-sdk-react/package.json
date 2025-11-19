@@ -1,6 +1,6 @@
 {
   "name": "xray-mini-app-sdk-react",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "React hooks for XRAY mini app messaging.",
   "type": "module",
   "main": "./dist/index.js",
