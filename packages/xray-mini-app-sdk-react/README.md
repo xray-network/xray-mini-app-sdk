@@ -8,8 +8,6 @@ React hooks and helpers that wrap `xray-mini-app-sdk` for idiomatic host/client 
 yarn add xray-mini-app-sdk-react
 ```
 
-> React and `xray-mini-app-sdk` are peer dependencies so they are not bundled twice.
-
 ## Host usage example
 
 ```tsx

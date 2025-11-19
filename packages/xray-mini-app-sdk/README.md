@@ -28,10 +28,6 @@ messenger.connect()
 - `createMiniAppClientMessenger()`
 - Typed helpers (`HostMessageType`, payload maps, type guards, and constants).
 
-## Build output
-
-`tsc` emits `dist/index.js` alongside `.d.ts` files for every public API surface.
-
 ## Sandbox
 
 `yarn serve:core` spins up a host/client sandbox that mirrors common flows, wires button actions to messenger calls, and echoes responses for quick debugging.
