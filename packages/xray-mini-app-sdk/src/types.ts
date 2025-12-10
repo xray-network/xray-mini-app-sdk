@@ -3,78 +3,102 @@ import { HOST_MESSAGE_TYPES, CLIENT_MESSAGE_TYPES } from "./constants.js"
 export type Network = "mainnet" | "preprod" | "preview"
 export type Explorer = "cardanoscan" | "cexplorer" | "adastat"
 export type Theme = "light" | "dark"
-export type SerializableRecord = Record<string, unknown>
 
-export type HostTipUpdatedPayload = SerializableRecord
-
-export type HostAccountStateUpdatedPayload = {
-  paymentAddress: string
-  stakingAddress: string | null
-  state: SerializableRecord | null
-  delegation: SerializableRecord | null
+export type HostAccountStatePayload = {
+  accountState: {
+    paymentAddress: string
+    stakingAddress: string | null
+    state: {
+      utxos: {
+        transaction: {
+          id: string
+        }
+        index: number
+        address: string
+        value: bigint
+        assets: {
+          policyId: string
+          assetName: string
+          quantity: bigint
+          decimals?: number
+        }[]
+        datumHash: string | null
+        datumType: "inline" | "hash" | null
+        scriptHash: string | null
+        datum?: string | null
+        script?: {
+          language: "PlutusV1" | "PlutusV2" | "PlutusV3" | "Native"
+          script: string
+        } | null
+      }[]
+      balance: {
+        value: bigint
+        assets: {
+          policyId: string
+          assetName: string
+          quantity: bigint
+          decimals?: number
+          fingerprint: string
+          assetNameAscii: string
+        }[]
+      }
+    } | null
+    delegation: {
+      delegation: string | null
+      rewards: bigint
+    } | null
+  } | null
 }
 
-export type HostThemeChangedPayload = {
-  theme: "light" | "dark"
+export type HostTipPayload = {
+  tip: {
+    hash: string
+    epochNo: number
+    absSlot: number
+    epochSlot: number
+    blockNo: number
+    blockTime: number
+  } | null
 }
 
-export type HostCurrencyChangedPayload = {
-  currency: "usd" | "eur" | "gbp" | "jpy" | "cny" 
-}
-
-export type HostNetworkChangedPayload = {
+export type HostNetworkPayload = {
   network: Network
 }
 
-export type HostHideBalanceChangedPayload = {
+export type HostThemePayload = {
+  theme: "light" | "dark"
+}
+
+export type HostCurrencyPayload = {
+  currency: "usd" | "eur" | "gbp" | "jpy" | "cny"
+}
+
+export type HostHideBalancesPayload = {
   hideBalances: boolean
 }
 
-export type HostExplorerChangedPayload = {
+export type HostExplorerPayload = {
   explorer: Explorer
 }
 
-export type HostTxResponsePayload = {
-  status: "success" | "error"
-  signedTxCbor?: string
-  txHash?: string
-  errorMessage?: string
-}
-
 export type HostMessagePayloadMap = {
-  "tipUpdated": HostTipUpdatedPayload
-  "accountStateUpdated": HostAccountStateUpdatedPayload
-  "networkChanged": HostNetworkChangedPayload
-  "themeChanged": HostThemeChangedPayload
-  "currencyChanged": HostCurrencyChangedPayload
-  "hideBalanceChanged": HostHideBalanceChangedPayload
-  "explorerChanged": HostExplorerChangedPayload
-  "signResponse": HostTxResponsePayload
-  "submitResponse": HostTxResponsePayload
-  "signAndSubmitResponse": HostTxResponsePayload
-}
-
-export type ClientNavigationUrlChangedPayload = {
-  url: string
-}
-
-export type ClientTxSignRequestPayload = {
-  unsignedTxCbor: string
-}
-
-export type ClientTxSubmitRequestPayload = {
-  signedTxCbor: string
-}
-
-export type ClientTxSignAndSubmitRequestPayload = {
-  unsignedTxCbor: string
+  "xray.host.tip": HostTipPayload
+  "xray.host.accountState": HostAccountStatePayload
+  "xray.host.network": HostNetworkPayload
+  "xray.host.theme": HostThemePayload
+  "xray.host.currency": HostCurrencyPayload
+  "xray.host.hideBalances": HostHideBalancesPayload
+  "xray.host.explorer": HostExplorerPayload
 }
 
 export type ClientMessagePayloadMap = {
-  "urlChanged": ClientNavigationUrlChangedPayload
-  "signRequest": ClientTxSignRequestPayload
-  "submitRequest": ClientTxSubmitRequestPayload
-  "signAndSubmitRequest": ClientTxSignAndSubmitRequestPayload
+  "xray.client.getTip": null
+  "xray.client.getNetwork": null
+  "xray.client.getAccountState": null
+  "xray.client.getTheme": null
+  "xray.client.getCurrency": null
+  "xray.client.getHideBalances": null
+  "xray.client.getExplorer": null
 }
 
 export type HostMessagePayload<T extends HostMessageType> = HostMessagePayloadMap[T]

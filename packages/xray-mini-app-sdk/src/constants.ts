@@ -1,23 +1,33 @@
 import type { HostMessageType, ClientMessageType } from "./types.js"
 
 export const HOST_MESSAGE_TYPES = [
-  "tipUpdated",
-  "accountStateUpdated",
-  "networkChanged",
-  "themeChanged",
-  "currencyChanged",
-  "hideBalanceChanged",
-  "explorerChanged",
-  "signResponse",
-  "submitResponse",
-  "signAndSubmitResponse",
+  "xray.host.tip",
+  "xray.host.accountState",
+  "xray.host.network",
+  "xray.host.theme",
+  "xray.host.currency",
+  "xray.host.hideBalances",
+  "xray.host.explorer",
 ] as const
 
 export const CLIENT_MESSAGE_TYPES = [
-  "urlChanged",
-  "signRequest",
-  "submitRequest",
-  "signAndSubmitRequest",
+  "xray.client.getTip",
+  "xray.client.getNetwork",
+  "xray.client.getAccountState",
+  "xray.client.getTheme",
+  "xray.client.getCurrency",
+  "xray.client.getHideBalances",
+  "xray.client.getExplorer",
+  // "cip30.getNetworkId",
+  // "cip30.getUtxos",
+  // "cip30.getBalance",
+  // "cip30.getUsedAddresses",
+  // "cip30.getUnusedAddresses",
+  // "cip30.getChangeAddress",
+  // "cip30.getRewardAddresses",
+  // "cip30.signTx",
+  // "cip30.signData",
+  // "cip30.submitTx",
 ] as const
 
 export const HOST_ALLOWED_MESSAGE_TYPES = new Set<string>([...HOST_MESSAGE_TYPES])
