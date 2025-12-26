@@ -85,6 +85,12 @@ export type HostRouteChangedPayload = {
   route: string
 }
 
+export type HostTxSubmittedPayload = {
+  success: boolean
+  hash: string
+}
+
+
 export type HostMessagePayloadMap = {
   "xray.host.tip": HostTipPayload
   "xray.host.accountState": HostAccountStatePayload
@@ -94,12 +100,16 @@ export type HostMessagePayloadMap = {
   "xray.host.hideBalances": HostHideBalancesPayload
   "xray.host.explorer": HostExplorerPayload
   "xray.host.routeChanged": HostRouteChangedPayload
+  "xray.host.txSubmitted": HostTxSubmittedPayload
 }
 
 export type ClientRouteChangedPayload = {
   route: string
 }
 
+export type ClientTxSubmitPayload = {
+  tx: string
+}
 
 export type ClientMessagePayloadMap = {
   "xray.client.getTip": null
@@ -110,6 +120,7 @@ export type ClientMessagePayloadMap = {
   "xray.client.getHideBalances": null
   "xray.client.getExplorer": null
   "xray.client.routeChanged": ClientRouteChangedPayload
+  "xray.client.submitTx": ClientTxSubmitPayload
 }
 
 export type HostMessagePayload<T extends HostMessageType> = HostMessagePayloadMap[T]

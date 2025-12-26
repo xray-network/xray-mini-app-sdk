@@ -9,6 +9,7 @@ export const HOST_MESSAGE_TYPES = [
   "xray.host.hideBalances",
   "xray.host.explorer",
   "xray.host.routeChanged",
+  "xray.host.txSubmitted",
 ] as const
 
 export const CLIENT_MESSAGE_TYPES = [
@@ -20,6 +21,7 @@ export const CLIENT_MESSAGE_TYPES = [
   "xray.client.getHideBalances",
   "xray.client.getExplorer",
   "xray.client.routeChanged",
+  "xray.client.submitTx",
   // "cip30.getNetworkId",
   // "cip30.getUtxos",
   // "cip30.getBalance",
