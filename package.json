@@ -1,22 +1,43 @@
 {
-  "name": "xray-mini-app-sdk-monorepo",
-  "private": true,
-  "version": "0.1.6",
-  "workspaces": [
-    "packages/*"
+  "name": "xray-mini-app-sdk",
+  "version": "0.2.0",
+  "author": "XRAY/Network <hello@xray.app>",
+  "description": "CIP30 messaging utilities for building XRAY Mini Apps.",
+  "license": "MIT",
+  "homepage": "https://xray.app",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xray-network/xray-mini-app-sdk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/xray-network/xray-mini-app-sdk/issues"
+  },
+  "keywords": [
+    "xray",
+    "mini-app",
+    "messaging"
+  ],
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/types.js",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/types.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
   ],
   "scripts": {
-    "build": "yarn workspaces run build",
-    "clean": "yarn workspaces run clean",
-    "lint": "echo \"No lint configured\"",
-    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,md,json,css,scss,html}\"",
-    "serve:core": "yarn workspace xray-mini-app-sdk sandbox",
-    "publish:core": "yarn workspace xray-mini-app-sdk publish --access public",
-    "publish:react": "yarn workspace xray-mini-app-sdk-react publish --access public"
+    "build": "rm -rf dist && tsc -p tsconfig.json",
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,md,json,css,scss,html}\""
   },
   "devDependencies": {
     "prettier": "^3.2.0",
     "serve": "^14.2.5",
+    "tsc": "^2.0.4",
     "typescript": "^5.4.0"
   }
 }

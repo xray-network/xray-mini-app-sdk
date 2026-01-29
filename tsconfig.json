@@ -1,8 +1,10 @@
 {
   "compilerOptions": {
-    "target": "ES2019",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    "outDir": "dist",
+    "rootDir": "src",
+    "target": "ES2022",
+    "module": "ES2022",
+    "moduleResolution": "bundler",
     "lib": ["DOM", "DOM.Iterable", "ES2020"],
     "declaration": true,
     "sourceMap": true,
@@ -10,5 +12,6 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
-  }
+  },
+  "include": ["src"]
 }
