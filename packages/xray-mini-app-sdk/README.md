@@ -69,7 +69,9 @@ miniAppHost.sendTheme(iframe, "dark", "theme-req-1")
 - `getHideBalances()` — `boolean` privacy flag.
 - `getExplorer()` — `"cardanoscan" | "cexplorer" | "adastat" | "xray"`.
 - `routeChanged(newRoute)` — notify host of navigation (fire-and-forget).
+- `signTx(txCborHex)` — host returns `{ success, hash }` for signature-only flows.
 - `submitTx(txCborHex)` — host submits transaction; response includes `{ success, hash }`.
+- `signAndSubmitTx(txCborHex)` — host signs, submits, returns `{ success, hash }`.
 - `signData(address, data)` — request signature for arbitrary data.
 - `listen(type, handler)` — subscribe to a specific host message.
 - `listenAll(handler)` — receive all host messages.
@@ -85,7 +87,9 @@ miniAppHost.sendTheme(iframe, "dark", "theme-req-1")
 - `sendHideBalances(iframe, payload, requestId)`
 - `sendExplorer(iframe, payload, requestId)`
 - `sendRouteChanged(iframe, payload, requestId)`
-- `sendTxSubmitted(iframe, payload, requestId)`
+- `sendSignTx(iframe, payload, requestId)`
+- `sendSubmitTx(iframe, payload, requestId)`
+- `sendSignAndSubmitTx(iframe, payload, requestId)`
 - `sendSignData(iframe, payload, requestId)`
 - `listen(iframe, type, handler)` — subscribe to a specific client message.
 - `listenAll(iframe, handler)` — receive all client messages.
@@ -93,7 +97,7 @@ miniAppHost.sendTheme(iframe, "dark", "theme-req-1")
 ## Message Flow Example
 
 1. Mini app calls `submitTx(txCborHex)`. SDK generates `requestId` and posts `{ type: "xray.client.submitTx", payload: txCborHex, requestId }`.
-2. Host receives the message via `miniAppHost.listen`, submits the transaction, then calls `sendTxSubmitted(iframe, { success: true, hash }, requestId)`.
+2. Host receives the message via `miniAppHost.listen`, submits the transaction, then calls `sendSubmitTx(iframe, { success: true, hash }, requestId)`.
 3. Client Promise resolves with the host response. If the host never responds before the timeout, the Promise resolves to `null` so the app can show a retry/failed state.
 
 ## Tips & Notes
