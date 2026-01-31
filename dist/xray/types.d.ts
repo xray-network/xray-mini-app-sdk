@@ -1,5 +1,4 @@
 export type HostHandshakePayload = boolean
-
 export type HostTipPayload = {
   hash: string
   epochNo: number
@@ -8,7 +7,6 @@ export type HostTipPayload = {
   blockNo: number
   blockTime: number
 } | null
-
 export type HostAccountStatePayload = {
   paymentAddress: string
   stakingAddress: string | null
@@ -52,24 +50,20 @@ export type HostAccountStatePayload = {
     rewards: bigint
   } | null
 } | null
-
 export type HostNetworkPayload = "mainnet" | "preprod" | "preview"
-
 export type HostThemePayload = "light" | "dark"
-
 export type HostCurrencyPayload = "usd" | "eur" | "gbp" | "jpy" | "cny"
-
 export type HostHideBalancesPayload = boolean
-
 export type HostExplorerPayload = "cardanoscan" | "cexplorer" | "adastat" | "xray"
-
 export type HostRouteChangedPayload = string
-
 export type HostTxSubmittedPayload = {
   success: boolean
   hash: string
 }
-
+export type HostSignDataPayload = {
+  success: boolean
+  data: string
+}
 export type HostMessagePayloadMap = {
   "xray.host.handshake": HostHandshakePayload
   "xray.host.tip": HostTipPayload
@@ -81,8 +75,8 @@ export type HostMessagePayloadMap = {
   "xray.host.explorer": HostExplorerPayload
   "xray.host.routeChanged": HostRouteChangedPayload
   "xray.host.txSubmitted": HostTxSubmittedPayload
+  "xray.host.signData": HostSignDataPayload
 }
-
 export type HostMessage = {
   [K in keyof HostMessagePayloadMap]: {
     type: K
@@ -90,11 +84,12 @@ export type HostMessage = {
     requestId: string
   }
 }[keyof HostMessagePayloadMap]
-
 export type ClientRouteChangedPayload = string
-
 export type ClientTxSubmitPayload = string
-
+export type ClientSignDataPayload = {
+  address: string
+  data: string
+}
 export type ClientMessagePayloadMap = {
   "xray.client.handshake": null
   "xray.client.getTip": null
@@ -106,8 +101,8 @@ export type ClientMessagePayloadMap = {
   "xray.client.getExplorer": null
   "xray.client.routeChanged": ClientRouteChangedPayload
   "xray.client.submitTx": ClientTxSubmitPayload
+  "xray.client.signData": ClientSignDataPayload
 }
-
 export type ClientMessage = {
   [K in keyof ClientMessagePayloadMap]: {
     type: K

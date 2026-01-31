@@ -1,11 +1,19 @@
 import type { ClientMessagePayloadMap, HostMessage, HostMessagePayloadMap } from "./types"
 
+/**
+ * Resolve the embedding window (likely the host iframe). Returns null when the
+ * mini-app is top-level or running in a non-browser environment.
+ */
 const getParentWindow = () => {
   if (typeof window === "undefined") return null
   if (!window.parent || window.parent === window) return null
   return window.parent
 }
 
+/**
+ * Generate a request correlation id, preferring `crypto.randomUUID` when
+ * available to minimize collision risk across concurrent calls.
+ */
 const getRequestId = () => {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
     return crypto.randomUUID()
@@ -13,6 +21,10 @@ const getRequestId = () => {
   return `${Date.now()}-${Math.random().toString(16).slice(2)}`
 }
 
+/**
+ * Post a message to the host window and (optionally) resolve when a correlated
+ * response arrives. A timeout returns null to avoid hanging the caller.
+ */
 const sendMessageAsync = async <
   RequestType extends keyof ClientMessagePayloadMap,
   ResponseType extends keyof HostMessagePayloadMap,
@@ -20,7 +32,7 @@ const sendMessageAsync = async <
   requestType: RequestType,
   payload: ClientMessagePayloadMap[RequestType],
   responseType: ResponseType,
-  timeout: number = 1_000,
+  timeout: number,
   requestId: string = getRequestId(),
   expectResponse: boolean = true
 ): Promise<{ type: ResponseType; payload: HostMessagePayloadMap[ResponseType]; requestId: string } | null> => {
@@ -50,107 +62,172 @@ const sendMessageAsync = async <
   })
 }
 
+/**
+ * Initiate handshake with the host mini-app container. Returns host info.
+ */
 export const sendHandshake = async (requestId?: string, timeout?: number) => {
   return await sendMessageAsync<"xray.client.handshake", "xray.host.handshake">(
     "xray.client.handshake",
     null,
     "xray.host.handshake",
-    timeout,
+    (timeout = 1_000),
     requestId
   )
 }
 
+/**
+ * Ask the host wallet for the latest chain tip. Returns block metadata or null
+ * when the host did not respond in time.
+ */
 export const getTip = async (requestId?: string, timeout?: number) => {
   return await sendMessageAsync<"xray.client.getTip", "xray.host.tip">(
     "xray.client.getTip",
     null,
     "xray.host.tip",
-    timeout,
+    (timeout = 1_000),
     requestId
   )
 }
 
+/**
+ * Fetch the wallet's current account state (UTxOs, balance, delegation).
+ */
 export const getAccountState = async (requestId?: string, timeout?: number) => {
   return await sendMessageAsync<"xray.client.getAccountState", "xray.host.accountState">(
     "xray.client.getAccountState",
     null,
     "xray.host.accountState",
-    timeout,
+    (timeout = 1_000),
     requestId
   )
 }
 
+/** Resolve which Cardano network the host is connected to. */
 export const getNetwork = async (requestId?: string, timeout?: number) => {
   return await sendMessageAsync<"xray.client.getNetwork", "xray.host.network">(
     "xray.client.getNetwork",
     null,
     "xray.host.network",
-    timeout,
+    (timeout = 1_000),
     requestId
   )
 }
 
+/** Retrieve the host's active theme so the mini-app can mirror UI styling. */
 export const getTheme = async (requestId?: string, timeout?: number) => {
   return await sendMessageAsync<"xray.client.getTheme", "xray.host.theme">(
     "xray.client.getTheme",
     null,
     "xray.host.theme",
-    timeout,
+    (timeout = 1_000),
     requestId
   )
 }
 
+/** Retrieve the user's preferred display currency (usd, eur, etc.). */
 export const getCurrency = async (requestId?: string, timeout?: number) => {
   return await sendMessageAsync<"xray.client.getCurrency", "xray.host.currency">(
     "xray.client.getCurrency",
     null,
     "xray.host.currency",
-    timeout,
+    (timeout = 1_000),
     requestId
   )
 }
 
+/** Determine whether balances should be hidden for privacy. */
 export const getHideBalances = async (requestId?: string, timeout?: number) => {
   return await sendMessageAsync<"xray.client.getHideBalances", "xray.host.hideBalances">(
     "xray.client.getHideBalances",
     null,
     "xray.host.hideBalances",
-    timeout,
+    (timeout = 1_000),
     requestId
   )
 }
 
+/** Discover which explorer base URL the host prefers the app to link to. */
 export const getExplorer = async (requestId?: string, timeout?: number) => {
   return await sendMessageAsync<"xray.client.getExplorer", "xray.host.explorer">(
     "xray.client.getExplorer",
     null,
     "xray.host.explorer",
-    timeout,
+    (timeout = 1_000),
     requestId
   )
 }
 
+/**
+ * Inform the host that the mini-app navigated to a new route. Fire-and-forget.
+ */
 export const routeChanged = async (newRoute: string, requestId?: string, timeout?: number) => {
   return await sendMessageAsync<"xray.client.routeChanged", "xray.host.routeChanged">(
     "xray.client.routeChanged",
     newRoute,
     "xray.host.routeChanged",
-    timeout,
+    (timeout = 1_000),
     requestId,
     false
   )
 }
 
-export const submitTx = async (txCborHex: string, requestId?: string, timeout?: number) => {
-  return await sendMessageAsync<"xray.client.submitTx", "xray.host.txSubmitted">(
-    "xray.client.submitTx",
+/**
+ * Request the host to sign a transaction. Returns signed tx cbor hex or null on timeout.
+ */
+export const signTx = async (txCborHex: string, requestId?: string, timeout?: number) => {
+  return await sendMessageAsync<"xray.client.signTx", "xray.host.signTx">(
+    "xray.client.signTx",
     txCborHex,
-    "xray.host.txSubmitted",
-    timeout,
+    "xray.host.signTx",
+    (timeout = 600_000),
     requestId
   )
 }
 
+/**
+ * Request the host to submit a transaction. Returns tx hash or null on timeout.
+ */
+export const submitTx = async (txCborHex: string, requestId?: string, timeout?: number) => {
+  return await sendMessageAsync<"xray.client.submitTx", "xray.host.submitTx">(
+    "xray.client.submitTx",
+    txCborHex,
+    "xray.host.submitTx",
+    (timeout = 600_000),
+    requestId
+  )
+}
+
+/**
+ * Request the host to sign and submit a transaction. Returns hash or null on timeout.
+ */
+export const signAndSubmitTx = async (txCborHex: string, requestId?: string, timeout?: number) => {
+  return await sendMessageAsync<"xray.client.submitTx", "xray.host.submitTx">(
+    "xray.client.submitTx",
+    txCborHex,
+    "xray.host.submitTx",
+    (timeout = 600_000),
+    requestId
+  )
+}
+
+/**
+ * Request the host to sign arbitrary data using a specific address. Caller is
+ * responsible for encoding data as hex/base64 per host expectations.
+ */
+export const signData = async (address: string, data: string, requestId?: string, timeout?: number) => {
+  return await sendMessageAsync<"xray.client.signData", "xray.host.signData">(
+    "xray.client.signData",
+    { address, data },
+    "xray.host.signData",
+    (timeout = 600_000),
+    requestId
+  )
+}
+
+/**
+ * Subscribe to a specific host message. Returns an unsubscribe function to
+ * simplify lifecycle management in SPA frameworks.
+ */
 export const listen = <MessageType extends keyof HostMessagePayloadMap>(
   messageType: MessageType,
   handler: ({
@@ -178,6 +255,10 @@ export const listen = <MessageType extends keyof HostMessagePayloadMap>(
   }
 }
 
+/**
+ * Listen for any host message regardless of type. Handy for debugging or when
+ * the consumer implements its own dispatching logic.
+ */
 export const listenAll = (handler: (message: HostMessage) => void) => {
   const parentWindow = getParentWindow()
   const handleMessage = (event: MessageEvent) => {
