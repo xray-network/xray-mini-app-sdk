@@ -73,20 +73,35 @@ export type HostSignTxPayload = {
   hash: string
 }
 
-export type HostSubmitTxPayload = {
-  success: boolean
-  hash: string
-}
+export type HostSubmitTxPayload =
+  | {
+      success: true
+      hash: string
+    }
+  | {
+      success: false
+      error: string
+    }
 
-export type HostSignAndSubmitTxPayload = {
-  success: boolean
-  hash: string
-}
+export type HostSignAndSubmitTxPayload =
+  | {
+      success: true
+      hash: string
+    }
+  | {
+      success: false
+      error: string
+    }
 
-export type HostSignDataPayload = {
-  success: boolean
-  data: string
-}
+export type HostSignDataPayload =
+  | {
+      success: true
+      data: string
+    }
+  | {
+      success: false
+      error: string
+    }
 
 // Host -> client routing map
 export type HostMessagePayloadMap = {
