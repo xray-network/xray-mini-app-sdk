@@ -1,4 +1,4 @@
-# Xray Mini App SDK
+# XRAY Mini App SDK
 
 Utilities for messaging between an embedded XRAY mini app (the iframe) and the XRAY host page (the parent window). The SDK wraps `window.postMessage`, adds request/response correlation via `requestId`, and ships type-safe payloads for common wallet operations.
 
