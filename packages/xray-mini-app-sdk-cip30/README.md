@@ -29,11 +29,11 @@ const wallet = await miniAppCip30Client.enable()
 
 // Read-only calls
 const networkId = await wallet.getNetworkId()          // 0 = testnet, 1 = mainnet
-const utxos = await wallet.getUtxos("1000000")         // optional amount + pagination
+const utxos = await wallet.getUtxos()                  // can pass { amount, paginate }
 const balance = await wallet.getBalance()
 
 // Signing & submission
-const signed = await wallet.signTx(txCborHex, true)    // partialSign defaults to false
+const signed = await wallet.signTx(txCborHex)          // can pass partialSign = true as 2nd arg
 const hash = await wallet.submitTx(txCborHex)
 
 // Extensions
