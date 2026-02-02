@@ -1,6 +1,6 @@
 {
   "name": "xray-mini-app-sdk",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "author": "XRAY/Network <hello@xray.app>",
   "description": "Messaging utilities for building XRAY Mini Apps.",
   "license": "MIT",
