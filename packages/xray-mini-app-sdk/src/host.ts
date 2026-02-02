@@ -15,7 +15,7 @@ import type {
   ClientMessage,
 } from "./types"
 
-// Post a message to an embedded iframe. Safe no-op when the iframe reference is missing.
+/** Post a message to an embedded iframe. Safe no-op when the iframe reference is missing. */
 const sendMessage = (iframe: Window | null | undefined, type: string, payload: any, requestId: string) => {
   if (!iframe) return
   iframe.postMessage({ type, payload, requestId }, "*")

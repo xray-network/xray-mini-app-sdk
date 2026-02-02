@@ -1,4 +1,13 @@
-import type { ClientMessagePayloadMap, HostMessage, HostMessagePayloadMap } from "./types"
+import type {
+  ClientMessagePayloadMap,
+  HostMessage,
+  HostMessagePayloadMap,
+  ClientSignTxPayload,
+  ClientRouteChangedPayload,
+  ClientSubmitTxPayload,
+  ClientSignAndSubmitTxPayload,
+  ClientSignDataPayload,
+} from "./types"
 
 /**
  * Resolve the embedding window (likely the host iframe). Returns null when the
@@ -160,7 +169,7 @@ export const getExplorer = async (requestId?: string, timeout?: number) => {
 /**
  * Inform the host that the mini-app navigated to a new route. Fire-and-forget.
  */
-export const routeChanged = async (newRoute: string, requestId?: string, timeout?: number) => {
+export const routeChanged = async (newRoute: ClientRouteChangedPayload, requestId?: string, timeout?: number) => {
   return await sendMessageAsync<"xray.client.routeChanged", "xray.host.routeChanged">(
     "xray.client.routeChanged",
     newRoute,
@@ -174,10 +183,10 @@ export const routeChanged = async (newRoute: string, requestId?: string, timeout
 /**
  * Request the host to sign a transaction. Returns signed tx cbor hex or null on timeout.
  */
-export const signTx = async (txCborHex: string, requestId?: string, timeout?: number) => {
+export const signTx = async (tx: ClientSignTxPayload, requestId?: string, timeout?: number) => {
   return await sendMessageAsync<"xray.client.signTx", "xray.host.signTx">(
     "xray.client.signTx",
-    txCborHex,
+    tx,
     "xray.host.signTx",
     (timeout = 600_000),
     requestId
@@ -187,10 +196,10 @@ export const signTx = async (txCborHex: string, requestId?: string, timeout?: nu
 /**
  * Request the host to submit a transaction. Returns tx hash or null on timeout.
  */
-export const submitTx = async (txCborHex: string, requestId?: string, timeout?: number) => {
+export const submitTx = async (tx: ClientSubmitTxPayload, requestId?: string, timeout?: number) => {
   return await sendMessageAsync<"xray.client.submitTx", "xray.host.submitTx">(
     "xray.client.submitTx",
-    txCborHex,
+    tx,
     "xray.host.submitTx",
     (timeout = 600_000),
     requestId
@@ -200,10 +209,10 @@ export const submitTx = async (txCborHex: string, requestId?: string, timeout?: 
 /**
  * Request the host to sign and submit a transaction. Returns hash or null on timeout.
  */
-export const signAndSubmitTx = async (txCborHex: string, requestId?: string, timeout?: number) => {
+export const signAndSubmitTx = async (tx: ClientSignAndSubmitTxPayload, requestId?: string, timeout?: number) => {
   return await sendMessageAsync<"xray.client.submitTx", "xray.host.submitTx">(
     "xray.client.submitTx",
-    txCborHex,
+    tx,
     "xray.host.submitTx",
     (timeout = 600_000),
     requestId
@@ -214,7 +223,12 @@ export const signAndSubmitTx = async (txCborHex: string, requestId?: string, tim
  * Request the host to sign arbitrary data using a specific address. Caller is
  * responsible for encoding data as hex/base64 per host expectations.
  */
-export const signData = async (address: string, data: string, requestId?: string, timeout?: number) => {
+export const signData = async (
+  address: ClientSignDataPayload["address"],
+  data: ClientSignDataPayload["data"],
+  requestId?: string,
+  timeout?: number
+) => {
   return await sendMessageAsync<"xray.client.signData", "xray.host.signData">(
     "xray.client.signData",
     { address, data },
