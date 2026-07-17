@@ -9,7 +9,7 @@ import {
   type ClientSubmitTxPayload,
   type ClientSignAndSubmitTxPayload,
   type ClientSignDataPayload,
-} from "xray-mini-app-protocol"
+} from "../protocol"
 import { getHostWindow, getRequestId } from "./messaging"
 
 /**

@@ -8,7 +8,7 @@ import {
   type Cip30ClientSignTxPayload,
   type Cip30ClientSignDataPayload,
   type Cip30ClientSubmitTxPayload,
-} from "xray-mini-app-protocol"
+} from "../protocol"
 import { getHostWindow, getRequestId } from "./messaging"
 
 export const version: string = "3.0.0"

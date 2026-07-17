@@ -1,4 +1,4 @@
-import type { HostMessage, Cip30HostMessage } from "xray-mini-app-protocol"
+import type { HostMessage, Cip30HostMessage } from "../protocol"
 import { dispatchMessageEvent } from "./events"
 
 export type MockClient = {

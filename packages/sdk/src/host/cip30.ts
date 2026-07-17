@@ -14,7 +14,7 @@ import type {
   Cip30HostSubmitTxPayload,
   Cip30ClientMessagePayloadMap,
   Cip30ClientMessage,
-} from "xray-mini-app-protocol"
+} from "../protocol"
 import { sendMessage, listenToWindow, listenAllFromWindow } from "./messaging"
 
 /** Confirm to the mini-app that the host is reachable and ready. */

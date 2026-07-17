@@ -3,21 +3,16 @@
   "private": true,
   "workspaces": [
     "packages/*",
-    "playground/*",
-    "e2e"
+    "playground/*"
   ],
   "scripts": {
-    "build": "yarn workspace xray-mini-app-protocol build && yarn workspace xray-mini-app-client build && yarn workspace xray-mini-app-host build && yarn workspace xray-mini-app-testing build",
+    "build": "yarn workspace @xray-network/mini-app-sdk build",
     "clean": "yarn workspaces run clean",
     "dev:host": "yarn workspace playground-host-app dev",
     "dev:mini-app": "yarn workspace playground-demo-mini-app dev",
-    "test:e2e": "yarn workspace e2e test",
     "lint": "echo \"No lint configured\"",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,md,json,css,scss,html}\"",
-    "publish:protocol": "yarn workspace xray-mini-app-protocol publish --access public",
-    "publish:client": "yarn workspace xray-mini-app-client publish --access public",
-    "publish:host": "yarn workspace xray-mini-app-host publish --access public",
-    "publish:testing": "yarn workspace xray-mini-app-testing publish --access public"
+    "publish:sdk": "yarn workspace @xray-network/mini-app-sdk publish --access public"
   },
   "devDependencies": {
     "prettier": "^3.2.0",

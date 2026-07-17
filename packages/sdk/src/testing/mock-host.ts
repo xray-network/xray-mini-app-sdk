@@ -5,8 +5,8 @@ import type {
   Cip30HostMessagePayloadMap,
   HostAccountStatePayload,
   HostTipPayload,
-} from "xray-mini-app-protocol"
-import { setHostWindow } from "xray-mini-app-client"
+} from "../protocol"
+import { setHostWindow } from "../client"
 import { dispatchMessageEvent } from "./events"
 
 /** Canned responses the mock host serves for each request type. */

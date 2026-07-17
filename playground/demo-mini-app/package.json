@@ -10,8 +10,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "xray-mini-app-client": "3.0.0",
-    "xray-mini-app-protocol": "3.0.0"
+    "@xray-network/mini-app-sdk": "3.0.0"
   },
   "devDependencies": {
     "typescript": "^5.4.0",

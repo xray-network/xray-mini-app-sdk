@@ -1,4 +1,4 @@
-import { miniAppClient } from "xray-mini-app-client"
+import { miniAppClient } from "@xray-network/mini-app-sdk/client"
 import "./style.css"
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `

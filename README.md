@@ -6,31 +6,36 @@ Framework-agnostic tooling that lets XRAY Mini Apps (iframes) talk to host shell
 
 ```
 ├── packages/
-│   ├── protocol/        # shared message types, zod schemas, constants
-│   ├── client/          # SDK running inside the mini app
-│   ├── host/            # SDK for the container app
-│   └── testing/         # createMockHost() / createMockClient()
-├── playground/
-│   ├── host-app/        # Vite app embedding mini apps (port 5173)
-│   └── demo-mini-app/   # Vite app built on the client SDK (port 5174)
-└── e2e/                 # Playwright tests
+│   └── sdk/             # @xray-network/mini-app-sdk (single publishable package)
+│       └── src/
+│           ├── protocol/    # shared message types, zod schemas, constants
+│           ├── client/      # SDK running inside the mini app
+│           ├── host/        # SDK for the container app
+│           └── testing/     # createMockHost() / createMockClient()
+└── playground/
+    ├── host-app/        # Vite app embedding mini apps (port 5173)
+    └── demo-mini-app/   # Vite app built on the client SDK (port 5174)
 ```
 
-## Packages
+## The package
 
-- [`xray-mini-app-protocol`](packages/protocol/README.md) – message types, zod schemas, and constants shared by both sides. The CIP-30 message surface lives here too.
-- [`xray-mini-app-client`](packages/client/README.md) – helpers for the mini app (iframe side), including the CIP-30 connector.
-- [`xray-mini-app-host`](packages/host/README.md) – helpers for the container app (parent window side), including CIP-30 responders.
-- [`xray-mini-app-testing`](packages/testing/README.md) – `createMockHost()` / `createMockClient()` for unit-testing either side without an iframe.
+Everything ships as one package, [`@xray-network/mini-app-sdk`](packages/sdk/README.md), with subpath exports so each side only imports its own surface:
+
+- `@xray-network/mini-app-sdk` (or `/protocol`) – message types, zod schemas, and constants shared by both sides. The CIP-30 message surface lives here too.
+- `@xray-network/mini-app-sdk/client` – helpers for the mini app (iframe side), including the CIP-30 connector.
+- `@xray-network/mini-app-sdk/host` – helpers for the container app (parent window side), including CIP-30 responders.
+- `@xray-network/mini-app-sdk/testing` – `createMockHost()` / `createMockClient()` for unit-testing either side without an iframe.
+- `@xray-network/mini-app-sdk/react` – React hooks for the client side (`useMiniApp`, `useTheme`, `useTip`, `useSignTx`, …) with an optional `<MiniAppProvider>`; `react` is an optional peer dependency.
+
+A protocol change is always published to client and host atomically — one version, no drift.
 
 ## Key scripts
 
 - `yarn install` – install dependencies for all workspaces.
-- `yarn build` – builds the publishable packages in dependency order.
+- `yarn build` – builds the SDK package.
 - `yarn clean` – removes `dist` folders.
 - `yarn dev:host` / `yarn dev:mini-app` – start the playground apps (run both, then open http://localhost:5173).
-- `yarn test:e2e` – run the Playwright suite (starts both playground apps automatically).
-- `yarn publish:protocol` / `publish:client` / `publish:host` / `publish:testing` – publish a package to npm.
+- `yarn publish:sdk` – publish the package to npm.
 
 ## Playground
 
@@ -43,9 +48,9 @@ yarn dev:mini-app  # http://localhost:5174 (embedded by the host app)
 
 ## Publishing Checklist
 
-1. Update versions in the relevant package(s) — keep the inter-package dependency versions in sync.
+1. Bump the version in `packages/sdk/package.json`.
 2. Run `yarn install` if dependencies changed to refresh the lockfile.
-3. Run `yarn build` to verify the emitted bundles.
-4. Publish with the corresponding `yarn publish:*` script.
+3. Run `yarn build` to verify the emitted bundle.
+4. Publish with `yarn publish:sdk`.
 
-All packages ship TypeScript declarations alongside ESM builds, so they work out of the box in modern bundlers.
+The package ships TypeScript declarations alongside ESM builds, so it works out of the box in modern bundlers.

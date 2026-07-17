@@ -1,10 +1,10 @@
-import { miniAppHost } from "xray-mini-app-host"
+import { miniAppHost } from "@xray-network/mini-app-sdk/host"
 import type {
   HostThemePayload,
   HostNetworkPayload,
   HostTipPayload,
   HostAccountStatePayload,
-} from "xray-mini-app-protocol"
+} from "@xray-network/mini-app-sdk"
 import "./style.css"
 
 const MINI_APP_URL = new URLSearchParams(location.search).get("miniapp") ?? "http://localhost:5174"
