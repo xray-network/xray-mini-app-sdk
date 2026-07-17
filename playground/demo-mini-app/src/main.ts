@@ -3,6 +3,12 @@ import "./style.css"
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   <h1>Demo Mini App</h1>
+  <nav>
+    <a href="#/" data-testid="nav-home">Home</a>
+    <a href="#/portfolio" data-testid="nav-portfolio">Portfolio</a>
+    <a href="#/swap" data-testid="nav-swap">Swap</a>
+    <code id="route" data-testid="route">/</code>
+  </nav>
   <dl>
     <dt>Handshake</dt>
     <dd id="handshake" data-testid="handshake">pending…</dd>
@@ -29,6 +35,8 @@ const applyTheme = (theme: string) => {
   el("theme").textContent = theme
 }
 
+const currentRoute = () => location.hash.replace(/^#/, "") || "/"
+
 const bootstrap = async () => {
   const handshake = await miniAppClient.sendHandshake()
   el("handshake").textContent = handshake?.payload ? "connected" : "no host"
@@ -47,8 +55,22 @@ const bootstrap = async () => {
   const balance = accountState?.payload?.state?.balance.value
   if (balance !== undefined) el("balance").textContent = balance.toString()
 
-  miniAppClient.routeChanged("/")
+  el("route").textContent = currentRoute()
+  miniAppClient.routeChanged(currentRoute())
 }
+
+// Report hash navigation to the host as route changes.
+window.addEventListener("hashchange", () => {
+  el("route").textContent = currentRoute()
+  miniAppClient.routeChanged(currentRoute())
+})
+
+// Host-driven navigation (deep links, browser back/forward in the host).
+// Setting the hash fires hashchange, which reports the route back to the
+// host — the host ignores it since it already knows this route.
+miniAppClient.listen("xray.host.routeChanged", ({ payload }) => {
+  if (currentRoute() !== payload) location.hash = payload
+})
 
 // Live updates pushed by the host.
 miniAppClient.listen("xray.host.theme", ({ payload }) => applyTheme(payload))

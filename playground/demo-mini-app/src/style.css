@@ -16,6 +16,18 @@ h1 {
   font-size: 1.1rem;
 }
 
+nav {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+nav code {
+  margin-left: auto;
+  opacity: 0.7;
+}
+
 dl {
   display: grid;
   grid-template-columns: max-content 1fr;
