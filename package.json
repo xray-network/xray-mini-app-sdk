@@ -2,19 +2,25 @@
   "name": "xray-mini-app-sdk-monorepo",
   "private": true,
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "playground/*",
+    "e2e"
   ],
   "scripts": {
-    "build": "yarn workspaces run build",
+    "build": "yarn workspace xray-mini-app-protocol build && yarn workspace xray-mini-app-client build && yarn workspace xray-mini-app-host build && yarn workspace xray-mini-app-testing build",
     "clean": "yarn workspaces run clean",
+    "dev:host": "yarn workspace playground-host-app dev",
+    "dev:mini-app": "yarn workspace playground-demo-mini-app dev",
+    "test:e2e": "yarn workspace e2e test",
     "lint": "echo \"No lint configured\"",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,md,json,css,scss,html}\"",
-    "publish:sdk": "yarn workspace xray-mini-app-sdk publish --access public",
-    "publish:sdk-cip30": "yarn workspace xray-mini-app-sdk-cip30 publish --access public"
+    "publish:protocol": "yarn workspace xray-mini-app-protocol publish --access public",
+    "publish:client": "yarn workspace xray-mini-app-client publish --access public",
+    "publish:host": "yarn workspace xray-mini-app-host publish --access public",
+    "publish:testing": "yarn workspace xray-mini-app-testing publish --access public"
   },
   "devDependencies": {
     "prettier": "^3.2.0",
-    "serve": "^14.2.5",
     "typescript": "^5.4.0"
   }
 }
